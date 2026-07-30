@@ -38,4 +38,4 @@ postgres_data/
 .DS_Store
 Thumbs.db
 
-alembic/versions/
+alembic/versions/*
