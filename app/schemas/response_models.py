@@ -5,7 +5,7 @@ class LoginResponse(BaseModel):
     username: str
     message: str
 
-class DocumentUploadResponse(BaseModel):
+class DocumentResponse(BaseModel):
     id: int
     original_filename: str
     stored_filename: str

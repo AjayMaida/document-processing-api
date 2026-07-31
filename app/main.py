@@ -1,7 +1,7 @@
 
 from fastapi import FastAPI,UploadFile, File, Depends
 from app.schemas.request_models import LoginRequest
-from app.schemas.response_models import LoginResponse, DocumentUploadResponse
+from app.schemas.response_models import LoginResponse, DocumentResponse
 from app.dependencies import get_document_service
 from app.services.document_service import DocumentService
 
@@ -43,12 +43,6 @@ def get_users(
         "limit": limit
     }
 
-# @app.post("/login")
-# def login(request: LoginRequest):
-#     return {
-#         "message":"login Successful !",
-#         "username": request.username
-#     }
 
 @app.post("/login", response_model=LoginResponse)
 def login(request: LoginRequest):
@@ -59,7 +53,7 @@ def login(request: LoginRequest):
     }
 
 
-@app.post("/documents/upload",response_model=DocumentUploadResponse)
+@app.post("/documents/upload",response_model=DocumentResponse)
 async def upload_document(
     file: UploadFile = File(...),
     service: DocumentService = Depends(get_document_service),
