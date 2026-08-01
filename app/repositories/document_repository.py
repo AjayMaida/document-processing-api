@@ -43,4 +43,11 @@ class DocumentRepository:
             self.db.query(Document)
             .filter(Document.id == document_id)
             .first()
-        )           
+        )    
+    def delete_document(
+            self,
+            document:Document
+    ):
+        self.db.delete(document)
+        self.db.commit()
+        

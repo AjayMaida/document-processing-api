@@ -12,12 +12,16 @@ class DocumentService:
 
 
 
+
+
     def _validate_file(self,file:UploadFile)-> None:
         if file.content_type not in settings.ALLOWED_CONTENT_TYPE:
             raise HTTPException(status_code=400, detail="Invalid file type")
 
         if not Path(file.filename).suffix.lower() in settings.ALLOWED_EXTENSIONS:
             raise HTTPException(status_code=400, detail="Invalid file extension")
+
+
         
 
     def _generate_filename(self,filename:str)->str:
@@ -54,6 +58,8 @@ class DocumentService:
             raise
 
 
+
+
     def get_documents(
             self,
             page: int,
@@ -70,6 +76,10 @@ class DocumentService:
             "total": total,
         }
 
+
+
+
+
     def get_document_by_id(
             self,
             document_id: int,
@@ -79,4 +89,38 @@ class DocumentService:
             raise HTTPException(status_code = 404, detail = "Document not found" )
         
         return document
-    
+
+
+
+
+    def delete_document(
+        self,
+        document_id: int,
+    ) -> None:
+
+        document = self.repository.get_document_by_id(document_id)
+
+        if document is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Document not found",
+            )
+
+        self.repository.delete_document(document)
+
+        file_path = Path(settings.upload_dir) / document.stored_filename
+
+        try:
+            file_path.unlink()
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to delete document file",
+            )
+
+        except PermissionError:
+            raise HTTPException(
+                status_code = 500,
+                detail = "Failed to delete document file"
+            )
+

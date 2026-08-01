@@ -63,7 +63,7 @@ async def upload_document(
     return document
 
 
-@app.get("/documents",response_model=DocumentListResponse)
+@app.get("/documents",    summary="List all documents",description="Returns paginated documents.",response_model=DocumentListResponse)
 def get_documents(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10,ge=1,le=10),
@@ -77,3 +77,12 @@ def get_document_by_id(
     service: DocumentService = Depends(get_document_service),
 ):
     return service.get_document_by_id(document_id)
+
+@app.delete("/documents/{document_id}")
+def delete_document(
+    document_id: int = Path(...,ge=1),
+    service: DocumentService = Depends(get_document_service),
+):
+    service.delete_document(document_id)
+
+    return {"message":"Document Deleted Successfully"}
