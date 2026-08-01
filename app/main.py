@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI,UploadFile, File, Depends,Query
+from fastapi import FastAPI,UploadFile, File, Depends,Query,Path
 from app.schemas.request_models import LoginRequest
 from app.schemas.response_models import LoginResponse, DocumentResponse, DocumentListResponse
 from app.dependencies import get_document_service
@@ -70,3 +70,10 @@ def get_documents(
     service: DocumentService = Depends(get_document_service),
 ):
     return service.get_documents(page,limit)
+
+@app.get("/documents/{document_id}",response_model=DocumentResponse)
+def get_document_by_id(
+    document_id: int = Path(...,ge=1),
+    service: DocumentService = Depends(get_document_service),
+):
+    return service.get_document_by_id(document_id)
