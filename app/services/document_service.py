@@ -124,3 +124,25 @@ class DocumentService:
                 detail = "Failed to delete document file"
             )
 
+    def download_document(
+            self,
+            document_id: int,
+    ) -> Document:
+
+        document = self.repository.get_document_by_id(document_id)
+
+        if document is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Document not found"
+            )
+        
+        file_path = Path(settings.upload_dir) / document.stored_filename
+
+        if not file_path.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="Document file not found"
+            )
+
+        return document
