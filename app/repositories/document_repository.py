@@ -24,7 +24,6 @@ class DocumentRepository:
             .order_by(Document.created_at.desc())
             .offset(offset)
             .limit(limit)
-            .offset(offset)
             .all()
         )
 
@@ -50,4 +49,3 @@ class DocumentRepository:
     ):
         self.db.delete(document)
         self.db.commit()
-        
