@@ -1,11 +1,12 @@
 
-from fastapi import FastAPI,UploadFile, File, Depends,Query,Path
+from fastapi import FastAPI,UploadFile, File, Depends,Query,Path as PathParam
 from app.schemas.request_models import LoginRequest
 from app.schemas.response_models import LoginResponse, DocumentResponse, DocumentListResponse
 from app.dependencies import get_document_service
 from app.services.document_service import DocumentService
-
-
+from fastapi.responses import FileResponse
+from app.core.config import settings
+from pathlib import Path
 
 app = FastAPI(
     title="Document Processing API",
@@ -73,16 +74,28 @@ def get_documents(
 
 @app.get("/documents/{document_id}",response_model=DocumentResponse)
 def get_document_by_id(
-    document_id: int = Path(...,ge=1),
+    document_id: int = PathParam(...,ge=1),
     service: DocumentService = Depends(get_document_service),
 ):
     return service.get_document_by_id(document_id)
 
 @app.delete("/documents/{document_id}")
 def delete_document(
-    document_id: int = Path(...,ge=1),
+    document_id: int = PathParam(...,ge=1),
     service: DocumentService = Depends(get_document_service),
 ):
     service.delete_document(document_id)
 
     return {"message":"Document Deleted Successfully"}
+
+@app.get("/documents/{document_id}/download")
+def download_document(
+    document_id: int = PathParam(..., ge=1),
+    service: DocumentService = Depends(get_document_service),
+):
+    document = service.download_document(document_id)
+    file_path = Path(settings.upload_dir) / document.stored_filename
+    return FileResponse(
+        path= file_path,
+        filename=document.original_filename,
+    )
