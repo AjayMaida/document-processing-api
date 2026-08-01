@@ -52,4 +52,20 @@ class DocumentService:
                 destination.unlink()
 
             raise
-        
+
+
+    def get_documents(
+            self,
+            page: int,
+            limit: int,
+    )->dict:
+        offset = (page - 1)  * limit
+        documents = self.repository.get_documents(offset, limit)
+        total = self.repository.get_all_documents()
+
+        return {
+            "documents": documents,
+            "page": page,
+            "limit": limit,
+            "total": total,
+        }

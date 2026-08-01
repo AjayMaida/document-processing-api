@@ -1,7 +1,7 @@
 
-from fastapi import FastAPI,UploadFile, File, Depends
+from fastapi import FastAPI,UploadFile, File, Depends,Query
 from app.schemas.request_models import LoginRequest
-from app.schemas.response_models import LoginResponse, DocumentResponse
+from app.schemas.response_models import LoginResponse, DocumentResponse, DocumentListResponse
 from app.dependencies import get_document_service
 from app.services.document_service import DocumentService
 
@@ -61,3 +61,12 @@ async def upload_document(
     document = await service.upload_document(file)
 
     return document
+
+
+@app.get("/documents",response_model=DocumentListResponse)
+def get_documents(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=10,ge=1,le=10),
+    service: DocumentService = Depends(get_document_service),
+):
+    return service.get_documents(page,limit)
