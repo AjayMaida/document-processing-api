@@ -1,10 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
-class LoginResponse(BaseModel):
-    username: str
-    message: str
-
 class DocumentResponse(BaseModel):
     id: int
     original_filename: str
