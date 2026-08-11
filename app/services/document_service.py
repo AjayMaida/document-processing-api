@@ -46,6 +46,11 @@ class DocumentService:
         try:
             created_document = self.repository.create(document)
             self.repository.commit()
+
+            # Dispatch async text extraction task
+            from app.tasks.extraction_tasks import extract_text_task
+            extract_text_task.delay(created_document.id)
+
             return created_document
         except Exception:
             self.repository.rollback()
@@ -149,3 +154,34 @@ class DocumentService:
             raise HTTPException(status_code=404, detail="Document file not found")
 
         return document
+
+    def get_document_text(
+        self,
+        document_id: int,
+        user_id: int,
+    ):
+        # Verify document ownership first
+        document = self.repository.get_document_by_id(document_id, user_id)
+
+        if document is None:
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        from app.repositories.extracted_text_repository import ExtractedTextRepository
+        from app.db.session import get_db_session
+
+        db = self.repository.db
+        extracted_repo = ExtractedTextRepository(db)
+        extracted = extracted_repo.get_by_document_id(document_id)
+
+        if extracted is None:
+            if document.status == "processing":
+                raise HTTPException(
+                    status_code=202,
+                    detail="Text extraction is still in progress. Please try again shortly.",
+                )
+            raise HTTPException(
+                status_code=404,
+                detail="Extracted text not found for this document.",
+            )
+
+        return extracted
