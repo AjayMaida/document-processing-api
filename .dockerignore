@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Environment files (never bake secrets into image)
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Alembic versions (kept in source, but not needed in image)
+# alembic/versions/  ← keep these
+
+# Uploads (managed as a Docker volume)
+uploads/
+
+# Docs / misc
+*.md
+HLD_LLD.md
+docs/
+
+# Makefile (build tooling, not needed at runtime)
+Makefile
