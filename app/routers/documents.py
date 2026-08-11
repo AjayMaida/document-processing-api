@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, UploadFile, File, Depends, Path as PathParam
-from app.schemas.document import DocumentResponse, DocumentListResponse
+from app.schemas.document import DocumentResponse, DocumentListResponse, ExtractedTextResponse
 from pathlib import Path
 from app.core.config import settings
 from fastapi.responses import FileResponse
@@ -81,3 +81,12 @@ def download_document(
         path=file_path,
         filename=document.original_filename,
     )
+
+
+@router.get("/{document_id}/text", response_model=ExtractedTextResponse)
+def get_document_text(
+    document_id: int = PathParam(..., ge=1),
+    service: DocumentService = Depends(get_document_service),
+    user: User = Depends(get_current_user),
+):
+    return service.get_document_text(document_id=document_id, user_id=user.id)

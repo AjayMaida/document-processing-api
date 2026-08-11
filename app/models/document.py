@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.extracted_text import ExtractedText
 
 
 
@@ -38,4 +39,9 @@ class Document(Base):
     )
     user: Mapped["User"] = relationship(
         back_populates="documents"
+    )
+
+    extracted_text: Mapped["ExtractedText | None"] = relationship(
+        back_populates="document",
+        uselist=False,
     )

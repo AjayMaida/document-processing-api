@@ -14,3 +14,13 @@ class DocumentListResponse(BaseModel):
     page: int
     limit: int
     total: int
+
+
+class ExtractedTextResponse(BaseModel):
+    document_id: int
+    content: str
+    page_count: int
+    word_count: int
+    extracted_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
