@@ -1,0 +1,10 @@
+# Test dependencies (includes all base deps)
+-r base.txt
+
+# Testing framework
+pytest==9.1.1
+pytest-asyncio==0.26.0
+httpx==0.28.1
+
+# Fake Redis for Celery task mocking in tests
+fakeredis==2.30.1
