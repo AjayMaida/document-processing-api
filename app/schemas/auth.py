@@ -20,3 +20,22 @@ class RegisterResponse(BaseModel):
     email: EmailStr
 
     model_config = ConfigDict(from_attributes=True)
+
+class LoginRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=30)
+    password: str = Field(min_length=8, max_length=128)
+
+
+class LoginResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+class RefreshTokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str

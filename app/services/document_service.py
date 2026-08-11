@@ -5,6 +5,9 @@ from pathlib import Path
 import shutil
 from fastapi import HTTPException,UploadFile
 from app.core.config import settings
+from app.models.user import User
+
+
 
 class DocumentService:
     def __init__(self, repository: DocumentRepository):
@@ -12,13 +15,13 @@ class DocumentService:
 
 
 
-
-
     def _validate_file(self,file:UploadFile)-> None:
-        if file.content_type not in settings.ALLOWED_CONTENT_TYPE:
+
+
+        if file.content_type not in settings.allowed_content_types:
             raise HTTPException(status_code=400, detail="Invalid file type")
 
-        if not Path(file.filename).suffix.lower() in settings.ALLOWED_EXTENSIONS:
+        if not Path(file.filename).suffix.lower() in settings.allowed_extensions:
             raise HTTPException(status_code=400, detail="Invalid file extension")
 
 
@@ -31,6 +34,7 @@ class DocumentService:
     async def upload_document(
             self,
             file:UploadFile,
+            current_user: User,
 
     ) -> Document:
         self._validate_file(file)
@@ -47,6 +51,7 @@ class DocumentService:
         original_filename=file.filename,
         stored_filename=stored_filename,
         status="uploaded",
+        user_id=current_user.id,
         )
 
         try:

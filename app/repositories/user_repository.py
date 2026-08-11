@@ -18,8 +18,13 @@ class UserRepository:
         stmt = select(User).where(User.email == email)
         return self.db.scalar(stmt)
 
+    
     def create(self, user: User) -> User:
         self.db.add(user)
         self.db.flush()
         self.db.refresh(user)
         return user
+
+    def get_by_id(self, user_id: int) -> User | None:
+        stmt = select(User).where(User.id == user_id)
+        return self.db.scalar(stmt)

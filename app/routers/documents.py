@@ -3,8 +3,10 @@ from app.schemas.document import DocumentResponse, DocumentListResponse
 from pathlib import Path
 from app.core.config import settings
 from fastapi.responses import FileResponse
-from app.dependencies import get_document_service
+from app.dependencies import get_document_service,get_current_user
 from app.services.document_service import DocumentService
+from app.models.user import User
+
 
 
 
@@ -27,10 +29,13 @@ def get_documents(
 async def upload_document(
     file: UploadFile = File(...),
     service: DocumentService = Depends(get_document_service),
+    user: User = Depends(get_current_user),
 ):
-    document = await service.upload_document(file)
 
-    return document
+    return await service.upload_document(
+        file,
+        current_user=user,
+    )
 
 
 @router.get("/documents/{document_id}",response_model=DocumentResponse)
