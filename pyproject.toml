@@ -11,7 +11,7 @@ line-length = 88
 profile = "black"
 
 [tool.pytest.ini_options]
-testpaths = ["app/tests"]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88

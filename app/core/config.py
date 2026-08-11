@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     allowed_extensions: list[str]
     allowed_content_types: list[str]
     database_url: str
+    test_database_url: str
     upload_dir: str
 
     jwt_secret_key: str
