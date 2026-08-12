@@ -212,13 +212,19 @@ function switchTab(tabName) {
 }
 
 async function uploadFile(file) {
+  if (!accessToken) {
+    alert('Please sign in first to upload documents.');
+    openAuthModal('login');
+    return;
+  }
   const formData = new FormData();
   formData.append('file', file);
   try {
-    await apiRequest('/documents/upload', { method: 'POST', body: formData });
+    const doc = await apiRequest('/documents/upload', { method: 'POST', body: formData });
+    alert(`Successfully uploaded "${doc.original_filename || file.name}"!`);
     loadDocuments();
   } catch (err) {
-    alert(err.message);
+    alert(err.message || 'Upload failed');
   }
 }
 

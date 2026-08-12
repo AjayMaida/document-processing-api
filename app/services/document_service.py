@@ -15,12 +15,12 @@ class DocumentService:
         self.repository = repository
 
     def _validate_file(self, file: UploadFile) -> None:
-
-        if file.content_type not in settings.allowed_content_types:
-            raise HTTPException(status_code=400, detail="Invalid file type")
-
-        if Path(file.filename).suffix.lower() not in settings.allowed_extensions:
-            raise HTTPException(status_code=400, detail="Invalid file extension")
+        ext = Path(file.filename).suffix.lower() if file.filename else ""
+        if ext not in settings.allowed_extensions and file.content_type not in settings.allowed_content_types:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file type '{ext}'. Allowed extensions: {settings.allowed_extensions}",
+            )
 
     def _generate_filename(self, filename: str) -> str:
         extention = Path(filename).suffix
@@ -41,26 +41,27 @@ class DocumentService:
         document = Document(
             original_filename=file.filename,
             stored_filename=stored_filename,
-            status="uploaded",
+            status="pending",
             user_id=current_user.id,
         )
 
         try:
             created_document = self.repository.create(document)
             self.repository.commit()
-
-            # Dispatch async text extraction task
-            from app.tasks.extraction_tasks import extract_text_task
-
-            extract_text_task.delay(created_document.id)
-
-            return created_document
         except Exception:
             self.repository.rollback()
             if destination.exists():
                 destination.unlink()
-
             raise
+
+        # Dispatch async text extraction task safely
+        try:
+            from app.tasks.extraction_tasks import extract_text_task
+            extract_text_task.delay(created_document.id)
+        except Exception as e:
+            print(f"Celery dispatch warning: {e}")
+
+        return created_document
 
     def get_documents(
         self,
