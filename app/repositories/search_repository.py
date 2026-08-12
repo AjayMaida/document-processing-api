@@ -1,12 +1,11 @@
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
-from sqlalchemy import select, func, or_
 
 from app.models.document import Document
 from app.models.extracted_text import ExtractedText
 
 
 class SearchRepository:
-
     def __init__(self, db: Session):
         self.db = db
 

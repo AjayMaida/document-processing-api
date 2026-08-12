@@ -1,12 +1,18 @@
-from fastapi import APIRouter, Query, UploadFile, File, Depends, Path as PathParam
-from app.schemas.document import DocumentResponse, DocumentListResponse, ExtractedTextResponse
 from pathlib import Path
-from app.core.config import settings
-from fastapi.responses import FileResponse
-from app.dependencies import get_document_service, get_current_user
-from app.services.document_service import DocumentService
-from app.models.user import User
 
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from fastapi import Path as PathParam
+from fastapi.responses import FileResponse
+
+from app.core.config import settings
+from app.dependencies import get_current_user, get_document_service
+from app.models.user import User
+from app.schemas.document import (
+    DocumentListResponse,
+    DocumentResponse,
+    ExtractedTextResponse,
+)
+from app.services.document_service import DocumentService
 
 router = APIRouter(
     prefix="/documents",

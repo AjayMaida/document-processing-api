@@ -6,7 +6,6 @@ from app.schemas.search import SearchResponse, SearchResult
 
 
 class SearchService:
-
     def __init__(self, db: Session):
         self.db = db
         self.repository = SearchRepository(db)
@@ -66,7 +65,9 @@ class SearchService:
         idx = lower_content.find(lower_query)
 
         if idx == -1:
-            return content[:context_chars] + ("..." if len(content) > context_chars else "")
+            return content[:context_chars] + (
+                "..." if len(content) > context_chars else ""
+            )
 
         start = max(0, idx - context_chars // 2)
         end = min(len(content), idx + len(query) + context_chars // 2)

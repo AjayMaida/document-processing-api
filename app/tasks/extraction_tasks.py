@@ -1,12 +1,13 @@
+import logging
+from pathlib import Path
+
 from app.celery_app import celery_app
-from app.db.session import SessionLocal
 from app.core.config import settings
+from app.db.session import SessionLocal
 from app.models.document import Document
 from app.models.extracted_text import ExtractedText
 from app.repositories.extracted_text_repository import ExtractedTextRepository
 from app.services.text_extraction_service import TextExtractionService
-from pathlib import Path
-import logging
 
 logger = logging.getLogger(__name__)
 

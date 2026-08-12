@@ -16,7 +16,6 @@ from unittest.mock import patch
 
 from tests.conftest import make_txt_upload
 
-
 # ============================================================
 # Upload
 # ============================================================
@@ -48,7 +47,9 @@ def test_upload_document_requires_auth(client):
 def test_upload_document_invalid_content_type(client, auth_headers):
     response = client.post(
         "/documents/upload",
-        files={"file": ("malware.exe", io.BytesIO(b"MZ..."), "application/octet-stream")},
+        files={
+            "file": ("malware.exe", io.BytesIO(b"MZ..."), "application/octet-stream")
+        },
         headers=auth_headers,
     )
     assert response.status_code == 400

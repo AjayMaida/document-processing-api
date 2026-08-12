@@ -1,13 +1,14 @@
 import io
+
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
 
-from app.main import app
+from app.core.config import settings
 from app.db.base import Base
 from app.dependencies import get_db
-from app.core.config import settings
+from app.main import app
 
 TEST_DATABASE_URL = settings.test_database_url
 
@@ -60,6 +61,7 @@ def mock_celery_task():
 
     with patch("app.tasks.extraction_tasks.extract_text_task.delay"):
         yield
+
 
 # ---------------------------------------------------------------------------
 # Shared helper fixtures
@@ -126,7 +128,9 @@ def auth_headers2(client, registered_user2):
     return {"Authorization": f"Bearer {token}"}
 
 
-def make_txt_upload(filename: str = "test.txt", content: str = "Hello world test content."):
+def make_txt_upload(
+    filename: str = "test.txt", content: str = "Hello world test content."
+):
     """Helper to build a multipart file upload payload."""
     return {
         "file": (filename, io.BytesIO(content.encode()), "text/plain"),
@@ -146,4 +150,3 @@ def uploaded_document(client, auth_headers):
         )
     assert response.status_code == 200
     return response.json()
-

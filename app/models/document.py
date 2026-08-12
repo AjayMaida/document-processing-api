@@ -1,16 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, String, func , ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column,relationship
+from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 
-from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
-    from app.models.user import User
     from app.models.extracted_text import ExtractedText
-
+    from app.models.user import User
 
 
 class Document(Base):
@@ -34,12 +32,10 @@ class Document(Base):
     )
 
     user_id: Mapped[int] = mapped_column(
-    ForeignKey("users.id"),
-    nullable=False,
+        ForeignKey("users.id"),
+        nullable=False,
     )
-    user: Mapped["User"] = relationship(
-        back_populates="documents"
-    )
+    user: Mapped["User"] = relationship(back_populates="documents")
 
     extracted_text: Mapped["ExtractedText | None"] = relationship(
         back_populates="document",

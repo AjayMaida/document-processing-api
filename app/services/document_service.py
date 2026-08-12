@@ -1,11 +1,13 @@
-from app.models.document import Document
-from app.repositories.document_repository import DocumentRepository
+import shutil
 import uuid
 from pathlib import Path
-import shutil
+
 from fastapi import HTTPException, UploadFile
+
 from app.core.config import settings
+from app.models.document import Document
 from app.models.user import User
+from app.repositories.document_repository import DocumentRepository
 
 
 class DocumentService:
@@ -17,7 +19,7 @@ class DocumentService:
         if file.content_type not in settings.allowed_content_types:
             raise HTTPException(status_code=400, detail="Invalid file type")
 
-        if not Path(file.filename).suffix.lower() in settings.allowed_extensions:
+        if Path(file.filename).suffix.lower() not in settings.allowed_extensions:
             raise HTTPException(status_code=400, detail="Invalid file extension")
 
     def _generate_filename(self, filename: str) -> str:
@@ -49,6 +51,7 @@ class DocumentService:
 
             # Dispatch async text extraction task
             from app.tasks.extraction_tasks import extract_text_task
+
             extract_text_task.delay(created_document.id)
 
             return created_document
