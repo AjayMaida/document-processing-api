@@ -18,6 +18,7 @@ class RegisterResponse(BaseModel):
     id: int
     username: str
     email: EmailStr
+    is_admin: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -31,6 +32,8 @@ class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    is_admin: bool = False
+    username: str
 
 
 class RefreshTokenRequest(BaseModel):

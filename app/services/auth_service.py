@@ -101,6 +101,8 @@ class AuthService:
             access_token=access_token,
             refresh_token=refresh_token,
             token_type="bearer",
+            is_admin=existing_user.is_admin,
+            username=existing_user.username,
         )
 
     def refresh_access_token(

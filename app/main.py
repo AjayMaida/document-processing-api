@@ -4,7 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.db.seed import seed_admin_user
+from app.db.session import SessionLocal
 from app.routers import documents
+from app.routers.admin import router as admin_router
 from app.routers.auth import router as auth_router
 from app.routers.search import router as search_router
 
@@ -13,6 +16,16 @@ app = FastAPI(
     description="Upload, manage, and search documents with AI-powered text extraction.",
     version="1.0.0",
 )
+
+
+@app.on_event("startup")
+def on_startup():
+    db = SessionLocal()
+    try:
+        seed_admin_user(db)
+    finally:
+        db.close()
+
 
 # Enable CORS for frontend applications
 app.add_middleware(
@@ -52,5 +65,7 @@ def health():
 app.include_router(documents.router)
 app.include_router(auth_router)
 app.include_router(search_router)
+app.include_router(admin_router)
+
 
 
