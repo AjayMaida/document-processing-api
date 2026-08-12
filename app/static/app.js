@@ -2,8 +2,13 @@ const API_BASE = window.location.origin;
 
 let authMode = 'login';
 let currentUsername = localStorage.getItem('username');
+let isAdminUser = localStorage.getItem('is_admin') === 'true';
 let accessToken = localStorage.getItem('access_token');
 let refreshToken = localStorage.getItem('refresh_token');
+
+let activeTab = 'dashboard';
+let currentDocText = '';
+let currentDocFilename = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
@@ -16,6 +21,7 @@ function initApp() {
   checkHealth();
   if (accessToken) {
     loadDocuments();
+    if (isAdminUser) loadAdminData();
   }
 }
 
@@ -81,18 +87,25 @@ async function doRefreshToken() {
 function updateAuthUI() {
   const isAuth = !!accessToken;
   document.getElementById('unauth-callout').classList.toggle('hidden', isAuth);
-  document.getElementById('auth-dashboard').classList.toggle('hidden', !isAuth);
+  document.getElementById('auth-dashboard').classList.toggle('hidden', !isAuth || activeTab !== 'dashboard');
+  document.getElementById('admin-dashboard').classList.toggle('hidden', !isAuth || activeTab !== 'admin');
+  document.getElementById('nav-links').classList.toggle('hidden', !isAuth);
+  document.getElementById('nav-btn-admin').classList.toggle('hidden', !isAuth || !isAdminUser);
   document.getElementById('user-badge').classList.toggle('hidden', !isAuth);
   document.getElementById('btn-signout').classList.toggle('hidden', !isAuth);
   document.getElementById('btn-signin').classList.toggle('hidden', isAuth);
   document.getElementById('btn-register').classList.toggle('hidden', isAuth);
 
   if (isAuth && currentUsername) {
-    document.getElementById('user-username-text').textContent = currentUsername;
+    document.getElementById('user-username-text').textContent = `${currentUsername} ${isAdminUser ? '(Admin)' : ''}`;
   }
 }
 
 function setupEventListeners() {
+  document.getElementById('brand-logo').onclick = () => switchTab('dashboard');
+  document.getElementById('nav-btn-docs').onclick = () => switchTab('dashboard');
+  document.getElementById('nav-btn-admin').onclick = () => switchTab('admin');
+
   document.getElementById('btn-signin').onclick = () => openAuthModal('login');
   document.getElementById('btn-register').onclick = () => openAuthModal('register');
   document.getElementById('callout-signin').onclick = () => openAuthModal('login');
@@ -117,13 +130,18 @@ function setupEventListeners() {
         });
         accessToken = res.access_token;
         refreshToken = res.refresh_token;
-        currentUsername = username;
+        currentUsername = res.username || username;
+        isAdminUser = res.is_admin || false;
+
         localStorage.setItem('access_token', accessToken);
         localStorage.setItem('refresh_token', refreshToken);
-        localStorage.setItem('username', username);
+        localStorage.setItem('username', currentUsername);
+        localStorage.setItem('is_admin', isAdminUser ? 'true' : 'false');
+
         closeAuthModal();
         updateAuthUI();
         loadDocuments();
+        if (isAdminUser) loadAdminData();
       } else {
         const email = document.getElementById('auth-email').value;
         const confirmPwd = document.getElementById('auth-confirm-password').value;
@@ -150,13 +168,22 @@ function setupEventListeners() {
     }
   };
 
-  // Upload dropzone
+  // Upload dropzone with click propagation fix
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('file-input');
 
-  dropzone.onclick = () => fileInput.click();
+  dropzone.onclick = (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  };
+
+  fileInput.onclick = (e) => e.stopPropagation();
+
   fileInput.onchange = (e) => {
-    if (e.target.files[0]) uploadFile(e.target.files[0]);
+    if (e.target.files[0]) {
+      uploadFile(e.target.files[0]);
+      fileInput.value = '';
+    }
   };
 
   dropzone.ondragover = (e) => e.preventDefault();
@@ -165,11 +192,23 @@ function setupEventListeners() {
     if (e.dataTransfer.files[0]) uploadFile(e.dataTransfer.files[0]);
   };
 
-  // Search
+  // Search & Refresh Buttons
   document.getElementById('btn-do-search').onclick = doSearch;
+  document.getElementById('btn-refresh-docs').onclick = () => loadDocuments();
+  document.getElementById('admin-btn-refresh').onclick = () => loadAdminData();
+
   document.getElementById('text-modal-close').onclick = () => {
     document.getElementById('text-modal').classList.add('modal-hidden');
   };
+
+  document.getElementById('text-modal-download-btn').onclick = downloadTextFile;
+}
+
+function switchTab(tabName) {
+  activeTab = tabName;
+  document.getElementById('nav-btn-docs').className = `btn ${tabName === 'dashboard' ? 'btn-primary' : 'btn-secondary'}`;
+  document.getElementById('nav-btn-admin').className = `btn ${tabName === 'admin' ? 'btn-primary' : 'btn-secondary'}`;
+  updateAuthUI();
 }
 
 async function uploadFile(file) {
@@ -234,17 +273,65 @@ function renderDocuments(docs) {
   if (window.lucide) lucide.createIcons();
 }
 
+async function loadAdminData() {
+  try {
+    const stats = await apiRequest('/admin/stats');
+    document.getElementById('admin-stat-users').textContent = stats.total_users ?? 0;
+    document.getElementById('admin-stat-docs').textContent = stats.total_documents ?? 0;
+    document.getElementById('admin-stat-completed').textContent = stats.completed_extractions ?? 0;
+    document.getElementById('admin-stat-words').textContent = stats.total_words_extracted ?? 0;
+
+    const usersData = await apiRequest('/admin/users');
+    renderAdminUsers(usersData.users || []);
+  } catch (e) {
+    console.error('Admin fetch error:', e);
+  }
+}
+
+function renderAdminUsers(users) {
+  const tbody = document.getElementById('admin-users-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = users
+    .map(
+      (u) => `
+    <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+      <td style="padding: 12px; font-family: var(--font-mono);">#${u.id}</td>
+      <td style="padding: 12px; font-weight: 600;">${u.username}</td>
+      <td style="padding: 12px; color: var(--text-muted);">${u.email}</td>
+      <td style="padding: 12px;"><span class="badge ${u.is_admin ? 'badge-warning' : 'badge-primary'}">${u.is_admin ? 'Admin' : 'User'}</span></td>
+      <td style="padding: 12px; font-weight: 700;">${u.document_count}</td>
+      <td style="padding: 12px; color: var(--text-muted);">${new Date(u.created_at).toLocaleDateString()}</td>
+    </tr>
+  `
+    )
+    .join('');
+}
+
 async function viewText(id, filename) {
+  currentDocFilename = filename;
   document.getElementById('text-modal-filename').textContent = filename;
   document.getElementById('text-modal-body').textContent = 'Loading extracted text...';
   document.getElementById('text-modal').classList.remove('modal-hidden');
 
   try {
     const res = await apiRequest(`/documents/${id}/text`);
-    document.getElementById('text-modal-body').textContent = res.content || 'No text content extracted.';
+    currentDocText = res.content || 'No text content extracted.';
+    document.getElementById('text-modal-body').textContent = currentDocText;
   } catch (err) {
     document.getElementById('text-modal-body').textContent = 'Failed to load text: ' + err.message;
   }
+}
+
+function downloadTextFile() {
+  if (!currentDocText) return;
+  const blob = new Blob([currentDocText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${currentDocFilename.split('.')[0]}_extracted.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 async function downloadDoc(id, filename) {
@@ -319,7 +406,9 @@ function logout() {
   accessToken = null;
   refreshToken = null;
   currentUsername = null;
+  isAdminUser = false;
   localStorage.clear();
+  switchTab('dashboard');
   updateAuthUI();
 }
 

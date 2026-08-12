@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DocuMind AI — Modern Document Processing Dashboard</title>
+  <title>DocuMind AI — Enterprise Document Processing Platform</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/><polyline points='14 2 14 8 20 8'/></svg>" />
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,25 +11,34 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <link rel="stylesheet" href="/static/style.css?v=3">
+  <link rel="stylesheet" href="/static/style.css?v=4">
 </head>
 <body>
   <!-- Header Navbar -->
   <header style="position: sticky; top: 0; z-index: 50; backdrop-filter: blur(16px); background: rgba(9, 13, 22, 0.85); border-bottom: 1px solid var(--border-glass);">
     <div class="container" style="display: flex; align-items: center; justify-content: space-between; height: 72px;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 0 15px rgba(99,102,241,0.4);">
-          <i data-lucide="file-text" style="width: 22px; height: 22px;"></i>
-        </div>
-        <div>
-          <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            DocuMind AI
-          </span>
-          <div style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem;">
-            <span id="api-health-dot" style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981;"></span>
-            <span id="api-health-text" style="color: var(--text-subtle);">API Online</span>
+      <div style="display: flex; align-items: center; gap: 28px;">
+        <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" id="brand-logo">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--primary) 0%, var(--accent-cyan) 100%); display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 0 15px rgba(99,102,241,0.4);">
+            <i data-lucide="file-text" style="width: 22px; height: 22px;"></i>
+          </div>
+          <div>
+            <span style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 800; background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+              DocuMind AI
+            </span>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 0.72rem;">
+              <span id="api-health-dot" style="width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px #10b981;"></span>
+              <span id="api-health-text" style="color: var(--text-subtle);">API Online</span>
+            </div>
           </div>
         </div>
+
+        <nav id="nav-links" class="hidden" style="display: flex; gap: 8px;">
+          <button id="nav-btn-docs" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.84rem;">My Documents</button>
+          <button id="nav-btn-admin" class="btn btn-secondary hidden" style="padding: 6px 14px; font-size: 0.84rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none;">
+            <i data-lucide="shield-check" style="width: 16px; height: 16px;"></i> Admin Portal
+          </button>
+        </nav>
       </div>
 
       <div style="display: flex; align-items: center; gap: 16px;">
@@ -53,15 +62,15 @@
   <!-- Main Container -->
   <main class="container" style="padding: 32px 24px 60px 24px;">
     <!-- Title Banner -->
-    <div style="margin-bottom: 36px; text-align: center;">
+    <div style="margin-bottom: 32px; text-align: center;">
       <div class="badge badge-primary" style="padding: 6px 16px; margin-bottom: 14px; font-size: 0.8rem;">
-        <i data-lucide="sparkles" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Asynchronous AI Text Extraction & Full-Text Search
+        <i data-lucide="sparkles" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> Enterprise AI Document Intelligence Platform
       </div>
       <h1 class="gradient-text" style="font-size: 2.5rem; font-weight: 800; margin-bottom: 12px;">
-        Document Processing Hub
+        DocuMind AI Platform
       </h1>
       <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 600px; margin: 0 auto;">
-        Upload PDFs, DOCX, and TXT files. Extract content asynchronously and perform real-time search across your documents.
+        Upload PDFs, DOCX, and TXT files. Asynchronous AI text extraction powered by Celery + Redis.
       </p>
     </div>
 
@@ -70,9 +79,9 @@
       <div style="width: 64px; height: 64px; border-radius: 20px; background: rgba(99,102,241,0.15); display: flex; align-items: center; justify-content: center; color: var(--primary); margin-bottom: 20px;">
         <i data-lucide="shield-alert" style="width: 32px; height: 32px;"></i>
       </div>
-      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">Sign In Required</h2>
+      <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 10px;">Sign In Required to Access Platform</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; line-height: 1.6;">
-        All documents are private and strictly scoped to user ownership. Sign in or create an account to start uploading files and viewing extracted text.
+        All documents are strictly protected under user ownership. Register an account or log in to manage your document workspace.
       </p>
       <div style="display: flex; gap: 14px;">
         <button id="callout-signin" class="btn btn-secondary" style="padding: 12px 24px;">Sign In</button>
@@ -80,7 +89,7 @@
       </div>
     </div>
 
-    <!-- Dashboard Content (Authenticated) -->
+    <!-- User Dashboard View -->
     <div id="auth-dashboard" class="hidden" style="display: flex; flex-direction: column; gap: 32px;">
       <!-- KPI Stats -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
@@ -147,7 +156,10 @@
       <!-- Documents & Search Section -->
       <div class="glass-panel" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
-          <h3 style="font-size: 1.2rem; font-weight: 700;">Your Document Library</h3>
+          <h3 style="font-size: 1.2rem; font-weight: 700;">Document Library</h3>
+          <button id="btn-refresh-docs" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.82rem;">
+            <i data-lucide="refresh-cw" style="width: 14px; height: 14px;"></i> Refresh
+          </button>
         </div>
 
         <!-- Search Input -->
@@ -159,6 +171,64 @@
 
         <!-- Documents Container Grid -->
         <div id="doc-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
+      </div>
+    </div>
+
+    <!-- Admin Portal View -->
+    <div id="admin-dashboard" class="hidden" style="display: flex; flex-direction: column; gap: 28px;">
+      <div class="glass-panel" style="padding: 24px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(15,23,42,0.6) 100%); border: 1px solid rgba(245,158,11,0.3);">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(245,158,11,0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center;">
+            <i data-lucide="shield-check" style="width: 28px; height: 28px;"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 800;">Admin Control Center</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">System-wide user directory, document audits, and analytics</p>
+          </div>
+        </div>
+        <button id="admin-btn-refresh" class="btn btn-secondary" style="gap: 6px; font-size: 0.85rem;">
+          <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Refresh Data
+        </button>
+      </div>
+
+      <!-- Admin KPI Stats -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="glass-panel" style="padding: 20px; background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(15,23,42,0.4) 100%);">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Registered Users</span>
+          <div id="admin-stat-users" style="font-size: 1.8rem; font-weight: 800;">0</div>
+        </div>
+        <div class="glass-panel" style="padding: 20px; background: linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(15,23,42,0.4) 100%);">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">System Documents</span>
+          <div id="admin-stat-docs" style="font-size: 1.8rem; font-weight: 800;">0</div>
+        </div>
+        <div class="glass-panel" style="padding: 20px; background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(15,23,42,0.4) 100%);">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Completed Extractions</span>
+          <div id="admin-stat-completed" style="font-size: 1.8rem; font-weight: 800;">0</div>
+        </div>
+        <div class="glass-panel" style="padding: 20px; background: linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(15,23,42,0.4) 100%);">
+          <span style="font-size: 0.85rem; color: var(--text-muted);">Total Words Extracted</span>
+          <div id="admin-stat-words" style="font-size: 1.8rem; font-weight: 800;">0</div>
+        </div>
+      </div>
+
+      <!-- User Directory Table -->
+      <div class="glass-panel" style="padding: 24px;">
+        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Registered Users Directory</h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-glass); color: var(--text-muted);">
+                <th style="padding: 12px;">ID</th>
+                <th style="padding: 12px;">Username</th>
+                <th style="padding: 12px;">Email</th>
+                <th style="padding: 12px;">Role</th>
+                <th style="padding: 12px;">Documents</th>
+                <th style="padding: 12px;">Joined Date</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </main>
@@ -208,9 +278,14 @@
           <h3 id="text-modal-filename" style="font-size: 1.2rem; font-weight: 700;">Document Text</h3>
           <span id="text-modal-meta" style="font-size: 0.8rem; color: var(--text-muted);">Extracted text content</span>
         </div>
-        <button id="text-modal-close" class="btn btn-secondary btn-icon" style="border-radius: 50%;">
-          <i data-lucide="x" style="width: 18px; height: 18px;"></i>
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button id="text-modal-download-btn" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.82rem;">
+            <i data-lucide="download" style="width: 14px; height: 14px;"></i> Download TXT
+          </button>
+          <button id="text-modal-close" class="btn btn-secondary btn-icon" style="border-radius: 50%;">
+            <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
       </div>
       <div id="text-modal-body" style="flex: 1; background: rgba(11,15,25,0.85); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 20px; overflow-y: auto; font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">
         Loading text content...
@@ -218,6 +293,6 @@
     </div>
   </div>
 
-  <script src="/static/app.js?v=3"></script>
+  <script src="/static/app.js?v=4"></script>
 </body>
 </html>

@@ -21,6 +21,7 @@ class ApiClient {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('username');
+    localStorage.removeItem('is_admin');
   }
 
   async request(endpoint, options = {}) {
@@ -45,7 +46,6 @@ class ApiClient {
         headers,
       });
 
-      // Handle 401 Unauthorized token refresh
       if (response.status === 401 && refreshToken && !endpoint.includes('/auth/')) {
         const refreshed = await this.refreshToken();
         if (refreshed) {
@@ -110,7 +110,8 @@ class ApiClient {
     });
     if (data.access_token) {
       this.setTokens(data.access_token, data.refresh_token);
-      localStorage.setItem('username', username);
+      localStorage.setItem('username', data.username || username);
+      localStorage.setItem('is_admin', data.is_admin ? 'true' : 'false');
     }
     return data;
   }
@@ -176,6 +177,19 @@ class ApiClient {
   async searchDocuments(query, page = 1, limit = 10) {
     const encoded = encodeURIComponent(query);
     return this.request(`/search?q=${encoded}&page=${page}&limit=${limit}`);
+  }
+
+  // Admin Endpoints
+  async getAdminStats() {
+    return this.request('/admin/stats');
+  }
+
+  async getAdminUsers(page = 1, limit = 20) {
+    return this.request(`/admin/users?page=${page}&limit=${limit}`);
+  }
+
+  async getAdminDocuments(page = 1, limit = 20) {
+    return this.request(`/admin/documents?page=${page}&limit=${limit}`);
   }
 }
 

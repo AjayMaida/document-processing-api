@@ -11,8 +11,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const username = localStorage.getItem('username');
     const token = localStorage.getItem('access_token');
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+
     if (username && token) {
-      setUser({ username });
+      setUser({ username, isAdmin });
       setIsAuthenticated(true);
     }
     setLoading(false);
@@ -20,7 +22,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const response = await api.login(username, password);
-    setUser({ username });
+    const isAdmin = response.is_admin || false;
+    setUser({ username, isAdmin });
     setIsAuthenticated(true);
     return response;
   };

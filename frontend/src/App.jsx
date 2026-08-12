@@ -7,13 +7,15 @@ import { StatsOverview } from './components/StatsOverview';
 import { SearchBar } from './components/SearchBar';
 import { DocumentGrid } from './components/DocumentGrid';
 import { TextViewerModal } from './components/TextViewerModal';
+import { AdminPortal } from './components/AdminPortal';
 import { Toast } from './components/Toast';
 import { api } from './services/api';
-import { Sparkles, ShieldAlert } from 'lucide-react';
+import { Sparkles, ShieldAlert, RefreshCw } from 'lucide-react';
 
 const DashboardContent = () => {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [documents, setDocuments] = useState([]);
   const [totalDocs, setTotalDocs] = useState(0);
   const [page, setPage] = useState(1);
@@ -61,6 +63,20 @@ const DashboardContent = () => {
       setTotalDocs(0);
     }
   }, [isAuthenticated, fetchDocuments]);
+
+  // Auto Polling for Pending Tasks
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const hasPending = documents.some((d) => d.status === 'pending' || d.status === 'uploaded');
+    if (!hasPending) return;
+
+    const interval = setInterval(() => {
+      fetchDocuments(page);
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, documents, page, fetchDocuments]);
 
   // Handle Search
   const handleSearch = async (query) => {
@@ -111,6 +127,8 @@ const DashboardContent = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
         onOpenAuth={(mode) => {
           setAuthMode(mode);
           setAuthModalOpen(true);
@@ -119,23 +137,23 @@ const DashboardContent = () => {
 
       <main className="container" style={{ flex: 1, padding: '32px 24px 60px 24px' }}>
         {/* Banner Section */}
-        <div style={{ marginBottom: '36px', textAlign: 'center' }}>
+        <div style={{ marginBottom: '32px', textAlign: 'center' }}>
           <div
             className="badge badge-primary"
             style={{ padding: '6px 16px', marginBottom: '14px', fontSize: '0.8rem' }}
           >
-            <Sparkles size={14} /> AI-Powered Asynchronous Extraction
+            <Sparkles size={14} /> Enterprise AI Document Intelligence Platform
           </div>
           <h1 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '12px' }} className="gradient-text">
-            Smart Document Intelligence
+            DocuMind AI Platform
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.05rem', maxWidth: '600px', margin: '0 auto' }}>
-            Upload PDFs, Word docs, and plain text files. Extract content asynchronously with Celery and perform instant full-text search.
+            Upload PDFs, DOCX, and TXT files. Asynchronous AI text extraction powered by Celery + Redis.
           </p>
         </div>
 
         {!isAuthenticated ? (
-          /* Unauthenticated Landing / Demo State */
+          /* Unauthenticated Landing */
           <div
             className="glass-panel"
             style={{
@@ -164,10 +182,10 @@ const DashboardContent = () => {
               <ShieldAlert size={32} />
             </div>
             <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '10px' }}>
-              Sign In Required to Manage Documents
+              Sign In Required to Access Platform
             </h2>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '24px', lineHeight: '1.6' }}>
-              Documents are strictly scoped to user ownership. Create a free account or log in to upload files, extract text, and run full-text search queries.
+              All documents are strictly protected under user ownership. Register an account or log in to manage your document workspace.
             </p>
             <div style={{ display: 'flex', gap: '14px' }}>
               <button
@@ -192,8 +210,11 @@ const DashboardContent = () => {
               </button>
             </div>
           </div>
+        ) : activeTab === 'admin' && user?.isAdmin ? (
+          /* Admin Portal Tab */
+          <AdminPortal onError={(msg) => showToast(msg, 'error')} />
         ) : (
-          /* Authenticated Dashboard Grid */
+          /* Main User Dashboard Tab */
           <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
             {/* KPI Stats */}
             <StatsOverview totalDocs={totalDocs} documents={documents} />
@@ -212,7 +233,7 @@ const DashboardContent = () => {
               onUploadError={(msg) => showToast(msg, 'error')}
             />
 
-            {/* Search & Document Header */}
+            {/* Document Library Controls */}
             <div
               className="glass-panel"
               style={{
@@ -231,10 +252,18 @@ const DashboardContent = () => {
                   gap: '16px',
                 }}
               >
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Your Documents</h3>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Total: <strong>{totalDocs}</strong>
-                </span>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Document Library</h3>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => fetchDocuments(page)}
+                    disabled={loading}
+                    className="btn btn-secondary"
+                    style={{ padding: '6px 12px', fontSize: '0.82rem', gap: '6px' }}
+                  >
+                    <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
+                  </button>
+                </div>
               </div>
 
               <SearchBar
