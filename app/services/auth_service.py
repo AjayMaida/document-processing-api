@@ -119,7 +119,12 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Refresh token has been revoked",
             )
-        if existing_token.expires_at < datetime.now(UTC):
+        token_expires = existing_token.expires_at
+        if token_expires.tzinfo is not None:
+            token_expires = token_expires.astimezone(UTC).replace(tzinfo=None)
+        now_naive = datetime.now(UTC).replace(tzinfo=None)
+
+        if token_expires < now_naive:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Refresh token has expired",
