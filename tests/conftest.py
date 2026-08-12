@@ -53,6 +53,14 @@ def client(db_session):
     app.dependency_overrides.clear()
 
 
+@pytest.fixture(autouse=True)
+def mock_celery_task():
+    """Globally mock the Celery extraction task so tests never need Redis."""
+    from unittest.mock import patch
+
+    with patch("app.tasks.extraction_tasks.extract_text_task.delay"):
+        yield
+
 # ---------------------------------------------------------------------------
 # Shared helper fixtures
 # ---------------------------------------------------------------------------
@@ -128,10 +136,14 @@ def make_txt_upload(filename: str = "test.txt", content: str = "Hello world test
 @pytest.fixture
 def uploaded_document(client, auth_headers):
     """Upload a test TXT document as user 1 and return the response JSON."""
-    response = client.post(
-        "/documents/upload",
-        files=make_txt_upload(),
-        headers=auth_headers,
-    )
+    from unittest.mock import patch
+
+    with patch("app.tasks.extraction_tasks.extract_text_task.delay"):
+        response = client.post(
+            "/documents/upload",
+            files=make_txt_upload(),
+            headers=auth_headers,
+        )
     assert response.status_code == 200
-    return response.json()
+    return response.json()
+

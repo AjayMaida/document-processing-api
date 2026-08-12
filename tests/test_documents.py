@@ -57,7 +57,7 @@ def test_upload_document_invalid_content_type(client, auth_headers):
 def test_upload_document_invalid_extension(client, auth_headers):
     response = client.post(
         "/documents/upload",
-        files={"file": ("image.png", io.BytesIO(b"PNG..."), "text/plain")},
+        files={"file": ("file.xyz", io.BytesIO(b"data..."), "text/plain")},
         headers=auth_headers,
     )
     assert response.status_code == 400

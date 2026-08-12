@@ -167,7 +167,6 @@ class DocumentService:
             raise HTTPException(status_code=404, detail="Document not found")
 
         from app.repositories.extracted_text_repository import ExtractedTextRepository
-        from app.db.session import get_db_session
 
         db = self.repository.db
         extracted_repo = ExtractedTextRepository(db)
