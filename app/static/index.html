@@ -35,7 +35,7 @@
       <div style="display: flex; align-items: center; gap: 16px;">
         <div id="user-badge" class="badge badge-primary hidden" style="padding: 6px 14px; text-transform: none; font-size: 0.85rem;">
           <i data-lucide="user" style="width: 14px; height: 14px;"></i>
-          <span id="user-email-text">user@example.com</span>
+          <span id="user-username-text">username</span>
         </div>
         <button id="btn-signout" class="btn btn-secondary hidden" style="gap: 6px; font-size: 0.85rem; padding: 8px 14px;">
           <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Sign Out
@@ -156,7 +156,6 @@
           <input type="text" id="search-input" class="input-field" style="padding-left: 46px; padding-right: 90px; height: 48px;" placeholder="Search filenames or extracted text content...">
           <button id="btn-do-search" class="btn btn-primary" style="position: absolute; right: 12px; padding: 6px 14px; font-size: 0.82rem;">Search</button>
         </div>
-        <div id="search-results-info" style="font-size: 0.85rem; color: var(--accent-cyan); display: none;"></div>
 
         <!-- Documents Container Grid -->
         <div id="doc-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;"></div>
@@ -166,21 +165,29 @@
 
   <!-- Auth Modal -->
   <div id="auth-modal" class="modal-overlay modal-hidden">
-    <div class="glass-panel" style="width: 100%; max-width: 420px; padding: 32px; position: relative;">
+    <div class="glass-panel" style="width: 100%; max-width: 440px; padding: 32px; position: relative;">
       <button id="auth-modal-close" class="btn btn-secondary btn-icon" style="position: absolute; top: 16px; right: 16px; border-radius: 50%;">
         <i data-lucide="x" style="width: 18px; height: 18px;"></i>
       </button>
       <div style="text-align: center; margin-bottom: 24px;">
         <h2 id="auth-title" style="font-size: 1.5rem; font-weight: 700;">Sign In</h2>
       </div>
-      <form id="auth-form" style="display: flex; flex-direction: column; gap: 16px;">
+      <form id="auth-form" style="display: flex; flex-direction: column; gap: 14px;">
         <div class="input-group">
+          <label class="input-label">Username</label>
+          <input type="text" id="auth-username" required minlength="3" maxlength="30" class="input-field" placeholder="johndoe">
+        </div>
+        <div id="auth-email-group" class="input-group">
           <label class="input-label">Email Address</label>
-          <input type="email" id="auth-email" required class="input-field" placeholder="name@example.com">
+          <input type="email" id="auth-email" class="input-field" placeholder="name@example.com">
         </div>
         <div class="input-group">
           <label class="input-label">Password</label>
-          <input type="password" id="auth-password" required class="input-field" placeholder="••••••••">
+          <input type="password" id="auth-password" required minlength="8" maxlength="128" class="input-field" placeholder="•••••••• (min 8 chars)">
+        </div>
+        <div id="auth-confirm-group" class="input-group">
+          <label class="input-label">Confirm Password</label>
+          <input type="password" id="auth-confirm-password" minlength="8" maxlength="128" class="input-field" placeholder="••••••••">
         </div>
         <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">
           Submit

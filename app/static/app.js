@@ -1,7 +1,7 @@
 const API_BASE = window.location.origin;
 
 let authMode = 'login';
-let currentUserEmail = localStorage.getItem('user_email');
+let currentUsername = localStorage.getItem('username');
 let accessToken = localStorage.getItem('access_token');
 let refreshToken = localStorage.getItem('refresh_token');
 
@@ -42,7 +42,13 @@ async function apiRequest(endpoint, options = {}) {
     let msg = `HTTP Error ${res.status}`;
     try {
       const json = await res.json();
-      if (json.detail) msg = typeof json.detail === 'string' ? json.detail : JSON.stringify(json.detail);
+      if (json.detail) {
+        if (Array.isArray(json.detail)) {
+          msg = json.detail.map((e) => e.msg || e.message).join(', ');
+        } else {
+          msg = typeof json.detail === 'string' ? json.detail : JSON.stringify(json.detail);
+        }
+      }
     } catch (e) {}
     throw new Error(msg);
   }
@@ -81,8 +87,8 @@ function updateAuthUI() {
   document.getElementById('btn-signin').classList.toggle('hidden', isAuth);
   document.getElementById('btn-register').classList.toggle('hidden', isAuth);
 
-  if (isAuth && currentUserEmail) {
-    document.getElementById('user-email-text').textContent = currentUserEmail;
+  if (isAuth && currentUsername) {
+    document.getElementById('user-username-text').textContent = currentUsername;
   }
 }
 
@@ -100,29 +106,43 @@ function setupEventListeners() {
 
   document.getElementById('auth-form').onsubmit = async (e) => {
     e.preventDefault();
-    const email = document.getElementById('auth-email').value;
+    const username = document.getElementById('auth-username').value;
     const pwd = document.getElementById('auth-password').value;
+
     try {
       if (authMode === 'login') {
         const res = await apiRequest('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({ email, password: pwd }),
+          body: JSON.stringify({ username, password: pwd }),
         });
         accessToken = res.access_token;
         refreshToken = res.refresh_token;
-        currentUserEmail = email;
+        currentUsername = username;
         localStorage.setItem('access_token', accessToken);
         localStorage.setItem('refresh_token', refreshToken);
-        localStorage.setItem('user_email', email);
+        localStorage.setItem('username', username);
         closeAuthModal();
         updateAuthUI();
         loadDocuments();
       } else {
+        const email = document.getElementById('auth-email').value;
+        const confirmPwd = document.getElementById('auth-confirm-password').value;
+
+        if (pwd !== confirmPwd) {
+          alert('Passwords do not match');
+          return;
+        }
+
         await apiRequest('/auth/register', {
           method: 'POST',
-          body: JSON.stringify({ email, password: pwd }),
+          body: JSON.stringify({
+            username,
+            email,
+            password: pwd,
+            confirm_password: confirmPwd,
+          }),
         });
-        alert('Registration successful! Please log in.');
+        alert('Account created successfully! You can now log in.');
         openAuthModal('login');
       }
     } catch (err) {
@@ -188,23 +208,26 @@ function renderDocuments(docs) {
 
   container.innerHTML = docs
     .map(
-      (doc) => `
+      (doc) => {
+        const docId = doc.id || doc.document_id;
+        return `
     <div class="glass-panel glass-panel-interactive" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
       <div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-          <span className="badge badge-primary">${(doc.original_filename.split('.').pop() || 'DOC').toUpperCase()}</span>
+          <span class="badge badge-primary">${(doc.original_filename.split('.').pop() || 'DOC').toUpperCase()}</span>
           <span class="badge ${doc.status === 'completed' ? 'badge-success' : 'badge-warning'}">${doc.status}</span>
         </div>
         <h4 style="font-size: 1rem; font-weight: 600; margin-bottom: 6px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${doc.original_filename}</h4>
         ${doc.snippet ? `<p style="font-size: 0.8rem; color: var(--accent-cyan); font-style: italic; margin-bottom: 10px;">"...${doc.snippet}..."</p>` : ''}
       </div>
       <div style="display: flex; gap: 8px; margin-top: 16px; border-top: 1px solid var(--border-glass); padding-top: 12px;">
-        <button class="btn btn-secondary" style="flex:1; padding: 6px; font-size: 0.8rem;" onclick="viewText(${doc.id}, '${doc.original_filename}')">Text</button>
-        <button class="btn btn-secondary" style="flex:1; padding: 6px; font-size: 0.8rem;" onclick="downloadDoc(${doc.id}, '${doc.original_filename}')">Download</button>
-        <button class="btn btn-danger btn-icon" style="width: 32px; height: 32px;" onclick="deleteDoc(${doc.id})"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+        <button class="btn btn-secondary" style="flex:1; padding: 6px; font-size: 0.8rem;" onclick="viewText(${docId}, '${doc.original_filename}')">Text</button>
+        <button class="btn btn-secondary" style="flex:1; padding: 6px; font-size: 0.8rem;" onclick="downloadDoc(${docId}, '${doc.original_filename}')">Download</button>
+        <button class="btn btn-danger btn-icon" style="width: 32px; height: 32px;" onclick="deleteDoc(${docId})"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
       </div>
     </div>
-  `
+  `;
+      }
     )
     .join('');
 
@@ -218,7 +241,7 @@ async function viewText(id, filename) {
 
   try {
     const res = await apiRequest(`/documents/${id}/text`);
-    document.getElementById('text-modal-body').textContent = res.extracted_text || 'No text content extracted.';
+    document.getElementById('text-modal-body').textContent = res.content || 'No text content extracted.';
   } catch (err) {
     document.getElementById('text-modal-body').textContent = 'Failed to load text: ' + err.message;
   }
@@ -277,10 +300,14 @@ async function checkHealth() {
 function openAuthModal(mode) {
   authMode = mode;
   document.getElementById('auth-title').textContent = mode === 'login' ? 'Sign In' : 'Create Account';
-  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'Sign In' : 'Register';
+  document.getElementById('auth-submit-btn').textContent = mode === 'login' ? 'Sign In' : 'Register Account';
   document.getElementById('auth-switch-prompt').textContent =
     mode === 'login' ? "Don't have an account?" : 'Already registered?';
   document.getElementById('auth-switch-btn').textContent = mode === 'login' ? 'Create one' : 'Sign in';
+
+  document.getElementById('auth-email-group').classList.toggle('hidden', mode === 'login');
+  document.getElementById('auth-confirm-group').classList.toggle('hidden', mode === 'login');
+
   document.getElementById('auth-modal').classList.remove('modal-hidden');
 }
 
@@ -291,7 +318,7 @@ function closeAuthModal() {
 function logout() {
   accessToken = null;
   refreshToken = null;
-  currentUserEmail = null;
+  currentUsername = null;
   localStorage.clear();
   updateAuthUI();
 }

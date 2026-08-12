@@ -9,25 +9,24 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Hydrate auth state on mount
-    const email = localStorage.getItem('user_email');
+    const username = localStorage.getItem('username');
     const token = localStorage.getItem('access_token');
-    if (email && token) {
-      setUser({ email });
+    if (username && token) {
+      setUser({ username });
       setIsAuthenticated(true);
     }
     setLoading(false);
   }, []);
 
-  const login = async (email, password) => {
-    const response = await api.login(email, password);
-    setUser({ email });
+  const login = async (username, password) => {
+    const response = await api.login(username, password);
+    setUser({ username });
     setIsAuthenticated(true);
     return response;
   };
 
-  const register = async (email, password) => {
-    const response = await api.register(email, password);
+  const register = async (username, email, password, confirmPassword) => {
+    const response = await api.register(username, email, password, confirmPassword);
     return response;
   };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
-import { FileText, LogIn, LogOut, User, Activity } from 'lucide-react';
+import { FileText, LogIn, LogOut, User } from 'lucide-react';
 
 export const Navbar = ({ onOpenAuth }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -33,7 +33,7 @@ export const Navbar = ({ onOpenAuth }) => {
         top: 0,
         zIndex: 50,
         backdropFilter: 'blur(16px)',
-        background: 'rgba(9, 13, 22, 0.8)',
+        background: 'rgba(9, 13, 22, 0.85)',
         borderBottom: '1px solid var(--border-glass)',
       }}
     >
@@ -103,7 +103,7 @@ export const Navbar = ({ onOpenAuth }) => {
                 style={{ padding: '6px 14px', textTransform: 'none', fontSize: '0.85rem' }}
               >
                 <User size={14} />
-                <span>{user?.email}</span>
+                <span>{user?.username}</span>
               </div>
               <button
                 onClick={logout}

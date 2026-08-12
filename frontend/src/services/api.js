@@ -20,7 +20,7 @@ class ApiClient {
   clearTokens() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user_email');
+    localStorage.removeItem('username');
   }
 
   async request(endpoint, options = {}) {
@@ -62,20 +62,22 @@ class ApiClient {
         try {
           const errorData = await response.json();
           if (errorData.detail) {
-            errorMessage = typeof errorData.detail === 'string' 
-              ? errorData.detail 
-              : JSON.stringify(errorData.detail);
+            if (Array.isArray(errorData.detail)) {
+              errorMessage = errorData.detail.map((e) => e.msg || e.message).join(', ');
+            } else {
+              errorMessage = typeof errorData.detail === 'string' 
+                ? errorData.detail 
+                : JSON.stringify(errorData.detail);
+            }
           }
         } catch (_) {}
         throw new Error(errorMessage);
       }
 
-      // If response is file download, return blob
       if (options.responseType === 'blob') {
         return await response.blob();
       }
 
-      // Default json response
       return await response.json();
     } catch (error) {
       console.error(`API Error [${endpoint}]:`, error);
@@ -89,21 +91,26 @@ class ApiClient {
   }
 
   // Auth Endpoints
-  async register(email, password) {
+  async register(username, email, password, confirmPassword) {
     return this.request('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        username,
+        email,
+        password,
+        confirm_password: confirmPassword,
+      }),
     });
   }
 
-  async login(email, password) {
+  async login(username, password) {
     const data = await this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
     if (data.access_token) {
       this.setTokens(data.access_token, data.refresh_token);
-      localStorage.setItem('user_email', email);
+      localStorage.setItem('username', username);
     }
     return data;
   }

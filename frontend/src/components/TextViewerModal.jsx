@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, FileText, Hash, AlignLeft } from 'lucide-react';
+import { X, Copy, Check, FileText, Hash, AlignLeft, Layers } from 'lucide-react';
 
 export const TextViewerModal = ({ isOpen, onClose, document, textData }) => {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !document) return null;
 
-  const content = textData?.extracted_text || 'No text extracted yet or extraction is in progress.';
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const charCount = content.length;
+  const content = textData?.content || textData?.extracted_text || 'No text extracted yet or extraction is in progress.';
+  const wordCount = textData?.word_count ?? (content.trim() ? content.trim().split(/\s+/).length : 0);
+  const pageCount = textData?.page_count ?? 1;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -52,9 +52,10 @@ export const TextViewerModal = ({ isOpen, onClose, document, textData }) => {
               <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>
                 {document.original_filename}
               </h3>
-              <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 <span><Hash size={12} style={{ display: 'inline', marginRight: '4px' }} /> ID: {document.id}</span>
-                <span><AlignLeft size={12} style={{ display: 'inline', marginRight: '4px' }} /> {wordCount} Words ({charCount} chars)</span>
+                <span><AlignLeft size={12} style={{ display: 'inline', marginRight: '4px' }} /> {wordCount} Words</span>
+                <span><Layers size={12} style={{ display: 'inline', marginRight: '4px' }} /> {pageCount} Pages</span>
               </div>
             </div>
           </div>
@@ -79,7 +80,7 @@ export const TextViewerModal = ({ isOpen, onClose, document, textData }) => {
         <div
           style={{
             flex: 1,
-            background: 'rgba(11, 15, 25, 0.8)',
+            background: 'rgba(11, 15, 25, 0.85)',
             border: '1px solid var(--border-glass)',
             borderRadius: 'var(--radius-md)',
             padding: '20px',
