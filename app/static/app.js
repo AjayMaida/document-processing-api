@@ -305,8 +305,8 @@ function openAuthModal(mode) {
     mode === 'login' ? "Don't have an account?" : 'Already registered?';
   document.getElementById('auth-switch-btn').textContent = mode === 'login' ? 'Create one' : 'Sign in';
 
-  document.getElementById('auth-email-group').classList.toggle('hidden', mode === 'login');
-  document.getElementById('auth-confirm-group').classList.toggle('hidden', mode === 'login');
+  document.getElementById('auth-email-group').style.display = mode === 'login' ? 'none' : 'flex';
+  document.getElementById('auth-confirm-group').style.display = mode === 'login' ? 'none' : 'flex';
 
   document.getElementById('auth-modal').classList.remove('modal-hidden');
 }
