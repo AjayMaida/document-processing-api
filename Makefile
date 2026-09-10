@@ -1,16 +1,16 @@
 .PHONY: run test lint format migrate
 
 run:
-	uvicorn app.main:app --reload
+	uv run uvicorn app.main:app --reload
 
 test:
-	pytest
+	uv run pytest
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff format .
+	uv run ruff format .
 
 migrate:
-	alembic upgrade head
+	uv run alembic upgrade head

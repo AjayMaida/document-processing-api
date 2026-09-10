@@ -3,9 +3,10 @@ from app.repositories.document_repository import DocumentRepository
 import uuid
 from pathlib import Path
 import shutil
-from fastapi import HTTPException, UploadFile
+from fastapi import BackgroundTasks, HTTPException, UploadFile
 from app.core.config import settings
 from app.models.user import User
+from app.tasks.extraction_tasks import extract_document_text
 
 
 class DocumentService:
@@ -28,6 +29,7 @@ class DocumentService:
         self,
         file: UploadFile,
         current_user: User,
+        background_tasks: BackgroundTasks,
     ) -> Document:
         self._validate_file(file)
         stored_filename = self._generate_filename(file.filename)
@@ -43,9 +45,15 @@ class DocumentService:
             user_id=current_user.id,
         )
 
+
         try:
             created_document = self.repository.create(document)
             self.repository.commit()
+            background_tasks.add_task(
+                extract_document_text,
+                created_document.id,
+                current_user.id,
+            )
             return created_document
         except Exception:
             self.repository.rollback()

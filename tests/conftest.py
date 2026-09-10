@@ -6,6 +6,8 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.db.base import Base
 from app.dependencies import get_db
+from app.models.document import Document
+from app.models.user import User
 
 
 from app.core.config import settings
@@ -53,3 +55,26 @@ def client(db_session):
         yield test_client
 
     app.dependency_overrides.clear()
+
+@pytest.fixture
+def document(db_session):
+    user = User(
+        username="testuser",
+        email="test@example.com",
+        hashed_password="hashed-password",
+    )
+
+    db_session.add(user)
+    db_session.flush()
+
+    document = Document(
+        original_filename="test.pdf",
+        stored_filename="stored-test.pdf",
+        status="uploaded",
+        user_id=user.id,
+    )
+
+    db_session.add(document)
+    db_session.flush()
+
+    return document

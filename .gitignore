@@ -22,7 +22,13 @@ env/
 htmlcov/
 
 # Uploads
-uploads/
+uploads/*
+!uploads/.gitkeep
+
+# Extracted texts
+extracted_texts/*
+!extracted_texts/.gitkeep
+        
 
 # Database
 *.db
@@ -39,5 +45,7 @@ postgres_data/
 Thumbs.db
 
 alembic/versions/*
+!alembic/versions/
+!alembic/versions/*.py
 
 test_db.sqlite

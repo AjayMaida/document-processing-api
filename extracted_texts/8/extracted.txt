@@ -1,0 +1,53 @@
+Ajay Maida
+Bengaluru, Karnataka, India   |   +91-7000191590   |   ajaymaida98@gmail.com   |   LinkedIn   |   GitHub   |   LeetCode
+Professional Summary
+Software Engineer with 2+ years of experience developing performance-oriented software using C++ and Python. Strong foundation in
+computer architecture, operating systems, Linux, data structures and algorithms, with hands-on experience optimizing low-latency
+inference applications using C/C++ and ONNX Runtime on embedded medical imaging hardware. Experienced in memory management,
+systems programming concepts, runtime performance optimization, and solving complex software engineering problems.
+Education
+National Institute of Technology, Jaipur, India
+July 2022 – May 2024
+M.Tech, Computer Science and Engineering    CGPA: 8.10/10
+National Institute of Technology, Bhopal, India
+July 2017 – May 2021
+B.Tech, Chemical Engineering    CGPA: 7.66/10
+Experience
+Tata Motors
+July 2024 – Nov 2025
+Software Engineer — Pune, India
+• Complaint Management Portal: Designed and deployed a Django + MySQL backend service supporting multi-user workflows,
+structured data storage, query performance, and automated escalation.
+• Data Retrieval Platform for EV Manuals & Retail Data: Designed and shipped a production data-retrieval service for structured and
+natural-language queries over large technical and retail datasets, reducing manual information lookup.
+Philips Healthcare
+Sep. 2023 – July 2024
+Software Engineer Intern — Pune, India
+• Real-Time C++ Inference Engine on Medical Imaging Hardware: Deployed PyTorch-trained models using C/C++ and ONNX
+Runtime on embedded medical imaging hardware, focusing on low-latency inference and efficient runtime execution.
+• Worked with memory layout and data marshaling while tuning the inference pipeline for real-time performance on resource-constrained
+hardware.
+• Surgical Instrument Detection Pipeline: Built a YOLO-style object detection pipeline for X-ray images and optimized the C/C++ ONNX
+Runtime execution path for real-time inference on constrained hardware.
+Projects
+Sort-Merge-Join Engine | C++, STL, File Systems Nov. 2022
+• Built a high-performance C++ engine for external sort-merge joins on database relations larger than available RAM using disk-based
+external merge sort.
+• Implemented disk-based algorithms with careful memory management and analyzed I/O costs in terms of block reads to reason about
+disk-access and performance trade-offs.
+Deep Fingerprinting: Traffic Analysis of Tor Networks | Python, Networking, Deep Learning Aug. 2023
+• M.Tech dissertation studying adversarial deanonymization of Tor traffic using deep learning; developed a defense algorithm based on
+minimal, targeted packet perturbations.
+• Worked with packet- and protocol-level traffic data, analyzing network behavior, bandwidth trade-offs, and system-security implications.
+Technical Skills
+Programming Languages: C, C++ (STL, memory management, RAII), Python, SQL, Java
+Systems & Computer Science: Operating Systems, Linux, Computer Architecture, Process & Memory Management, Multithreading &
+Concurrency, File Systems, Disk I/O
+Performance & Runtime: Performance Optimization, Low-Latency Systems, ONNX Runtime, Debugging, Runtime Efficiency
+Tools & Infrastructure: Git/GitHub, Docker, CMake, MySQL, Django, REST APIs
+Coursework: Data Structures & Algorithms, Operating Systems, Computer Architecture, DBMS, Computer Networks, Object-Oriented
+Design
+Achievements
+• Solved 1000+ DSA problems across LeetCode, GeeksforGeeks, Codeforces, and CodeChef.
+• 5-star rated on HackerRank for C++ and problem-solving and 3-star coder at CodeChef.
+• 1st Place – Weekly Coding Contest at MNIT Jaipur (consistent winner).

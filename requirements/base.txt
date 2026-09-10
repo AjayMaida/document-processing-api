@@ -1,13 +1,15 @@
 fastapi
-uvicorn
-pydantic-settings
-python-dotenv
+uvicorn[standard]
 sqlalchemy
 alembic
 psycopg[binary]
+pydantic-settings
+python-dotenv
 PyJWT
 passlib[bcrypt]
 email-validator
 python-multipart
+
+# Test dependencies
 pytest
 httpx
