@@ -63,36 +63,26 @@ git clone <repository-url>
 cd document-processing-api
 ```
 
-### Create a virtual environment
+### Install and sync with uv
+
+Install uv if it is not already available:
 
 ```bash
-python -m venv .venv
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Activate the environment
-
-**Windows**
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-**Linux/macOS**
+Then create a Python 3.12 environment and install the project dependencies:
 
 ```bash
-source .venv/bin/activate
-```
-
-### Install dependencies
-
-```bash
-pip install -r requirements/base.txt
+uv python install 3.12
+uv sync
 ```
 
 ### Run the application
 
 ```bash
-uvicorn app.main:app --reload
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload
 ```
 
 ---

@@ -1,0 +1,68 @@
+Ajay Maida
+Bengaluru, Karnataka, 560087
+ +91-7000191590 | # ajaymaida98@gmail.com | ï LinkedIn | § GitHub | Ð GFG | Ð LeetCode
+Professional Summary
+Software Engineer with 2+ years of experience building production software using C++ and Python. Strong foundation in
+C++, Linux, operating systems, computer networks, and data structures algorithms, with hands-on experience developing
+high-performance applications, backend systems, and low-latency inference engines using ONNX Runtime. Passionate about
+distributed systems, storage technologies, and solving performance and scalability challenges.
+Education
+National Institute of Technology, Jaipur, India
+July 2022 – May 2024
+M.Tech, Computer Science and Engineering
+CGPA : 8.10/10
+National Institute of Technology, Bhopal, India
+July 2017 – May 2021
+B.Tech, Chemical Engineering
+CGPA : 7.66/10
+Experience
+Tata Motors
+July 2024 – Nov 2025
+Software Engineer
+Pune, India
+• Complaint Management Portal: Designed and deployed a Django + MySQL backend service enabling employees to
+log, track, and escalate vehicle complaints, handling structured data storage, query performance, and multi-user
+concurrency, with automated escalation workflows that reduced average resolution turnaround time.
+• Data Retrieval Platform for EV Manuals & Retail Data: Designed and shipped a production data-retrieval
+service (LangChain, ChromaDB) to serve structured and natural-language queries against large technical and retail
+datasets, including auto-generated SQL for retail data analysis, cutting manual lookup time significantly.
+Philips
+Sep. 2023 – July 2024
+Software Engineer Intern
+Pune, India
+• Real-Time C++ Inference Engine on Medical Imaging Hardware: Deployed PyTorch-trained models to
+production using C/C++ and ONNX Runtime, managing memory layout, data marshaling, and inference-time
+performance tuning to enable low-latency inference on embedded medical imaging devices.
+• Surgical Instrument Detection Pipeline: Built a YOLO-style object detection application to identify surgical
+instruments in X-ray images, optimizing the C/C++ ONNX Runtime pipeline for real-time inference speed on
+constrained hardware.
+Projects
+Sort-Merge-Join Engine | C++, STL, File Systems
+Nov 2022
+• Built a high-performance C++ engine to perform external sort-merge join operations on database relations too large
+to fit in memory, using disk-based external merge sort.
+• Implemented disk-based algorithms with careful memory management to correctly and efficiently process datasets larger
+than available RAM.
+• Computed and analyzed I/O cost of joining relations in terms of block reads, reasoning about disk-access trade-offs in
+query execution.
+Deep Fingerprinting: Traffic Analysis of Tor Networks | Python, Networking, DL
+August 2023
+• M.Tech dissertation studying adversarial deanonymization of Tor network traffic via deep-learning-based traffic
+fingerprinting; developed a defense algorithm countering the attack via minimal, targeted packet perturbations.
+• Worked with packet-level and protocol-level network traffic data, requiring low-level reasoning about network behavior,
+bandwidth trade-offs, and system security.
+Multi-Agent Research Assistant | LangGraph, FastAPI, Docker
+2026 – Present
+• Built a multi-service agentic pipeline with a FastAPI backend, containerized with Docker and deployed on Render,
+demonstrating service design, API architecture, and containerized delivery.
+Technical Skills
+Languages: C/C++ (STL, memory management, RAII), Python, SQL, Java
+Systems & OS: Linux internals, file systems, disk I/O, multithreading & concurrency, process/memory management
+Distributed Systems Fundamentals: replication, consistency models, CAP theorem, external sorting/joins, scalability &
+performance trade-offs
+Tools & Infra: Git/GitHub, Docker, MySQL, Django, CMake, ONNX Runtime, REST APIs
+Course Work: Data Structures & Algorithms, Operating Systems, DBMS, Computer Networks, Object-Oriented Design
+Achievements
+• Solved 1000+ DSA problems across LeetCode, GFG, Codeforces, & CodeChef.
+• 5-star rated on HackerRank for C++ & problem-solving and 3-star coder at CodeChef.
+• 1st Place – Weekly Coding Contest at MNIT Jaipur (consistent winner).

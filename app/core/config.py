@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     database_url: str
     test_database_url: str
     upload_dir: str
+    extracted_text_dir: str
 
     jwt_secret_key: str
     jwt_algorithm: str
