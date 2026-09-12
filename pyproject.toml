@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "alembic",
     "bcrypt<5",
+    "celery>=5.4.0",
     "email-validator",
     "fastapi",
     "passlib[bcrypt]",
@@ -16,6 +17,7 @@ dependencies = [
     "python-docx>=1.2.0",
     "python-dotenv",
     "python-multipart",
+    "redis>=5.0.0",
     "sqlalchemy",
     "uvicorn[standard]",
 ]
@@ -38,3 +40,6 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
+
+[tool.ruff.lint]
+ignore = ["B008"]

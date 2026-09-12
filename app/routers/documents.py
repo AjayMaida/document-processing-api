@@ -1,20 +1,22 @@
+from pathlib import Path
+
 from fastapi import (
     APIRouter,
-    BackgroundTasks,
+    Depends,
+    File,
     Query,
     UploadFile,
-    File,
-    Depends,
+)
+from fastapi import (
     Path as PathParam,
 )
-from app.schemas.document import DocumentResponse, DocumentListResponse
-from pathlib import Path
-from app.core.config import settings
 from fastapi.responses import FileResponse
-from app.dependencies import get_document_service, get_current_user
-from app.services.document_service import DocumentService
-from app.models.user import User
 
+from app.core.config import settings
+from app.dependencies import get_current_user, get_document_service
+from app.models.user import User
+from app.schemas.document import DocumentListResponse, DocumentResponse
+from app.services.document_service import DocumentService
 
 router = APIRouter(
     prefix="/documents",
@@ -43,7 +45,6 @@ def get_documents(
 
 @router.post("/upload", response_model=DocumentResponse)
 async def upload_document(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     service: DocumentService = Depends(get_document_service),
     user: User = Depends(get_current_user),
@@ -52,7 +53,6 @@ async def upload_document(
     return await service.upload_document(
         file,
         current_user=user,
-        background_tasks=background_tasks,
     )
 
 

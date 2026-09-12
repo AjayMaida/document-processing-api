@@ -387,11 +387,11 @@ DocumentRepository
 class Document(Base):
     __tablename__ = "documents"
 
-    id:                int       # PK, auto-increment
-    original_filename: str       # VARCHAR(255), not null
-    stored_filename:   str       # VARCHAR(255), not null (UUID-based)
-    status:            str       # VARCHAR(50), default="uploaded"
-    created_at:        datetime  # TIMESTAMP TZ, server default now()
+    id: int  # PK, auto-increment
+    original_filename: str  # VARCHAR(255), not null
+    stored_filename: str  # VARCHAR(255), not null (UUID-based)
+    status: str  # VARCHAR(50), default="uploaded"
+    created_at: datetime  # TIMESTAMP TZ, server default now()
 ```
 
 ---
@@ -400,11 +400,11 @@ class Document(Base):
 
 ```python
 class Settings(BaseSettings):
-    allowed_extentions:    str   # ← typo: 'extentions'
+    allowed_extentions: str  # ← typo: 'extentions'
     allowed_content_types: str
-    database_url:          str
-    upload_dir:            str
-    model_config = SettingsConfigDict(env_file='.env')
+    database_url: str
+    upload_dir: str
+    model_config = SettingsConfigDict(env_file=".env")
 ```
 
 > ⚠️ **Bug:** `document_service.py` calls `settings.ALLOWED_CONTENT_TYPE` and `settings.ALLOWED_EXTENSIONS` — wrong attribute names (case-sensitive + typo mismatch). Will cause `AttributeError` at runtime.

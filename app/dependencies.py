@@ -10,7 +10,6 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-
 # ---------------------------------------------------------------------------
 # Local application imports
 # ---------------------------------------------------------------------------
@@ -22,7 +21,6 @@ from app.repositories.extracted_text_repository import ExtractedTextRepository
 from app.repositories.user_repository import UserRepository
 from app.services.document_service import DocumentService
 
-
 # HTTP Bearer authentication scheme.
 # FastAPI uses this to extract the access token from:
 # Authorization: Bearer <token>
@@ -32,6 +30,7 @@ bearer_scheme = HTTPBearer()
 # ---------------------------------------------------------------------------
 # Document dependencies
 # ---------------------------------------------------------------------------
+
 
 # Creates a DocumentRepository using the database session provided by FastAPI.
 #
@@ -61,6 +60,7 @@ def get_document_service(
 # Extracted text dependencies
 # ---------------------------------------------------------------------------
 
+
 # Creates an ExtractedTextRepository using the database session.
 #
 # This repository is responsible only for database operations related
@@ -77,6 +77,7 @@ def get_extracted_text_repository(
 # ---------------------------------------------------------------------------
 # Authentication dependency
 # ---------------------------------------------------------------------------
+
 
 # Returns the currently authenticated user.
 #
