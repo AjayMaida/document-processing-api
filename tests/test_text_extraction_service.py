@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pymupdf
 import pytest
+from fastapi import HTTPException
 
 from app.models.document import Document
 from app.services.exceptions import TextExtractionError
@@ -59,11 +60,7 @@ def test_extract_txt_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     result = service.extract_text(document)
 
     # Assert
-    output_file = (
-        extracted_text_dir
-        / str(document.id)
-        / "extracted.txt"
-    )
+    output_file = extracted_text_dir / str(document.id) / "extracted.txt"
 
     assert output_file.exists()
     assert output_file.read_text(encoding="utf-8") == source_text
@@ -110,7 +107,7 @@ def test_extract_txt_file_missing_source(
     service, repository = create_service()
 
     # Act / Assert
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPException):
         service.extract_text(document)
 
     repository.get_by_document_id.assert_not_called()
@@ -129,7 +126,7 @@ def test_extract_unsupported_file_type(
     )
 
     # Act / Assert
-    with pytest.raises(Exception):
+    with pytest.raises(HTTPException):
         service._extract_from_file(document_path)
 
 
@@ -147,8 +144,6 @@ def test_extract_txt_encoding_error(
     # Act / Assert
     with pytest.raises(TextExtractionError):
         service._extract_from_file(document_path)
-
-
 
 
 def test_extract_pdf_file(
@@ -200,11 +195,7 @@ def test_extract_pdf_file(
     result = service.extract_text(document)
 
     # Assert
-    output_file = (
-        extracted_text_dir
-        / str(document.id)
-        / "extracted.txt"
-    )
+    output_file = extracted_text_dir / str(document.id) / "extracted.txt"
 
     assert output_file.exists()
     assert "Hello from a PDF document." in output_file.read_text(
@@ -276,11 +267,7 @@ def test_extract_docx_file(
     result = service.extract_text(document)
 
     # Assert
-    output_file = (
-        extracted_text_dir
-        / str(document.id)
-        / "extracted.txt"
-    )
+    output_file = extracted_text_dir / str(document.id) / "extracted.txt"
 
     assert output_file.exists()
 

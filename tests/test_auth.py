@@ -1,9 +1,7 @@
+from datetime import UTC, datetime, timedelta
 
-from datetime import datetime, timedelta, timezone
-
-from app.core.security import create_jwt_token, hash_refresh_token
+from app.core.security import hash_refresh_token
 from app.models.refresh_token import RefreshToken
-
 
 # ============================================================
 # Registration
@@ -300,7 +298,7 @@ def test_expired_refresh_token(client, db_session):
     token = RefreshToken(
         user_id=user.id,
         token_hash=hash_refresh_token(raw_token),
-        expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+        expires_at=datetime.now(UTC) - timedelta(days=1),
     )
 
     db_session.add(token)
@@ -330,8 +328,8 @@ def test_revoked_refresh_token(client, db_session):
     token = RefreshToken(
         user_id=user.id,
         token_hash=hash_refresh_token(raw_token),
-        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
-        revoked_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(UTC) + timedelta(days=1),
+        revoked_at=datetime.now(UTC),
     )
 
     db_session.add(token)
@@ -396,15 +394,16 @@ def test_authenticated_endpoint_with_invalid_token(client):
 
 
 def test_authenticated_endpoint_with_expired_token(client):
-    from app.core.config import settings
     import jwt
+
+    from app.core.config import settings
 
     expired_token = jwt.encode(
         {
             "sub": "1",
             "type": "access",
-            "iat": datetime.now(timezone.utc) - timedelta(hours=2),
-            "exp": datetime.now(timezone.utc) - timedelta(hours=1),
+            "iat": datetime.now(UTC) - timedelta(hours=2),
+            "exp": datetime.now(UTC) - timedelta(hours=1),
         },
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
@@ -421,15 +420,16 @@ def test_authenticated_endpoint_with_expired_token(client):
 
 
 def test_authenticated_endpoint_with_refresh_token_as_bearer(client):
-    from app.core.config import settings
     import jwt
+
+    from app.core.config import settings
 
     token = jwt.encode(
         {
             "sub": "1",
             "type": "refresh",
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat": datetime.now(UTC),
+            "exp": datetime.now(UTC) + timedelta(hours=1),
         },
         settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm,
@@ -443,4 +443,3 @@ def test_authenticated_endpoint_with_refresh_token_as_bearer(client):
     )
 
     assert response.status_code == 401
-

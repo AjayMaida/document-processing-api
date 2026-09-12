@@ -1,11 +1,13 @@
-from app.models.document import Document
-from app.repositories.document_repository import DocumentRepository
+import shutil
 import uuid
 from pathlib import Path
-import shutil
-from fastapi import BackgroundTasks, HTTPException, UploadFile
+
+from fastapi import HTTPException, UploadFile
+
 from app.core.config import settings
+from app.models.document import Document
 from app.models.user import User
+from app.repositories.document_repository import DocumentRepository
 from app.tasks.extraction_tasks import extract_document_text
 
 
@@ -29,7 +31,6 @@ class DocumentService:
         self,
         file: UploadFile,
         current_user: User,
-        background_tasks: BackgroundTasks,
     ) -> Document:
         self._validate_file(file)
         stored_filename = self._generate_filename(file.filename)
@@ -45,12 +46,10 @@ class DocumentService:
             user_id=current_user.id,
         )
 
-
         try:
             created_document = self.repository.create(document)
             self.repository.commit()
-            background_tasks.add_task(
-                extract_document_text,
+            extract_document_text.delay(
                 created_document.id,
                 current_user.id,
             )

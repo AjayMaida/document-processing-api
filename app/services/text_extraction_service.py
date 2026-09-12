@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pymupdf
 from docx import Document as DocxDocument
 from fastapi import HTTPException, status
@@ -139,12 +140,9 @@ class TextExtractionService:
 
     def _extract_from_pdf(self, document_path: Path) -> str:
         """Extract text from a PDF document."""
-  
+
         with pymupdf.open(document_path) as pdf:
-            return "\n".join(
-                page.get_text()
-                for page in pdf
-            )
+            return "\n".join(page.get_text() for page in pdf)
 
     def _extract_from_docx(self, document_path: Path) -> str:
         """Extract text from a DOCX document."""
@@ -168,10 +166,7 @@ class TextExtractionService:
         additional extraction artifacts or versions without changing the
         storage layout.
         """
-        output_dir = (
-            Path(settings.extracted_text_dir)
-            / str(document_id)
-        )
+        output_dir = Path(settings.extracted_text_dir) / str(document_id)
         output_dir.mkdir(
             parents=True,
             exist_ok=True,
