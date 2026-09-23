@@ -37,6 +37,11 @@ profile = "black"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+    "ignore:'crypt' is deprecated",
+    "ignore:builtin type .* has no __module__ attribute",
+]
 
 [tool.ruff]
 line-length = 88

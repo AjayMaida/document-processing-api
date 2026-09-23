@@ -2,17 +2,25 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
+from app.dependencies import get_current_user
+from app.models.user import User
 from app.schemas.auth import (
     RefreshTokenRequest,
     RefreshTokenResponse,
     RegisterRequest,
     RegisterResponse,
+    UserResponse,
 )
 from app.services.auth_service import AuthService, LoginRequest
 
 router = APIRouter(
     prefix="/auth",
     tags=["Authentication"],
+)
+
+user_router = APIRouter(
+    prefix="/users",
+    tags=["Users"],
 )
 
 
@@ -48,3 +56,25 @@ def refresh_token(
     service = AuthService(db)
 
     return service.refresh_access_token(request)
+
+
+@router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user profile",
+)
+def get_current_user_profile(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user
+
+
+@user_router.get(
+    "/me",
+    response_model=UserResponse,
+    summary="Get current user profile",
+)
+def get_user_me(
+    current_user: User = Depends(get_current_user),
+):
+    return current_user

@@ -443,3 +443,56 @@ def test_authenticated_endpoint_with_refresh_token_as_bearer(client):
     )
 
     assert response.status_code == 401
+
+
+# ============================================================
+# User Profile (/me)
+# ============================================================
+
+
+def test_get_current_user_profile_success(client):
+    register_response = client.post(
+        "/auth/register",
+        json={
+            "username": "profileuser",
+            "email": "profile@example.com",
+            "password": "Password123!",
+            "confirm_password": "Password123!",
+        },
+    )
+    assert register_response.status_code == 200
+
+    login_response = client.post(
+        "/auth/login",
+        json={
+            "username": "profileuser",
+            "password": "Password123!",
+        },
+    )
+    assert login_response.status_code == 200
+    access_token = login_response.json()["access_token"]
+
+    auth_me_response = client.get(
+        "/auth/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert auth_me_response.status_code == 200
+    profile = auth_me_response.json()
+    assert profile["username"] == "profileuser"
+    assert profile["email"] == "profile@example.com"
+    assert "created_at" in profile
+
+    users_me_response = client.get(
+        "/users/me",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert users_me_response.status_code == 200
+    assert users_me_response.json()["username"] == "profileuser"
+
+
+def test_get_current_user_profile_unauthorized(client):
+    response = client.get("/auth/me")
+    assert response.status_code == 401
+
+    users_response = client.get("/users/me")
+    assert users_response.status_code == 401

@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.base import Base
-from app.dependencies import get_db
+from app.dependencies import get_current_user, get_db
 from app.main import app
 from app.models.document import Document
 from app.models.user import User
@@ -103,3 +103,24 @@ def document(db_session):
     db_session.flush()
 
     return document
+
+
+@pytest.fixture
+def authenticated_user(client, db_session):
+    """
+    Fixture to create a user and override authentication.
+    Automatically cleans up overrides after the test.
+    """
+    user = User(
+        username="testuser",
+        email="test@example.com",
+        hashed_password="hashed-password",
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    app.dependency_overrides[get_current_user] = lambda: user
+
+    yield user
+
+    app.dependency_overrides.pop(get_current_user, None)

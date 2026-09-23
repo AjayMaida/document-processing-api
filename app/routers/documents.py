@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from fastapi import (
     APIRouter,
     Depends,
@@ -10,9 +8,8 @@ from fastapi import (
 from fastapi import (
     Path as PathParam,
 )
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 
-from app.core.config import settings
 from app.dependencies import get_current_user, get_document_service
 from app.models.user import User
 from app.schemas.document import DocumentListResponse, DocumentResponse
@@ -43,6 +40,26 @@ def get_documents(
     )
 
 
+@router.get(
+    "/search",
+    summary="Search documents",
+    description="Search for documents by filename.",
+    response_model=DocumentListResponse,
+)
+def search_documents(
+    q: str = Query(..., description="Search keyword"),
+    service: DocumentService = Depends(get_document_service),
+    user: User = Depends(get_current_user),
+):
+    documents = service.search_documents(q, user.id)
+    return {
+        "documents": documents,
+        "page": 1,
+        "limit": len(documents),
+        "total": len(documents),
+    }
+
+
 @router.post("/upload", response_model=DocumentResponse)
 async def upload_document(
     file: UploadFile = File(...),
@@ -68,6 +85,21 @@ def get_document_by_id(
     )
 
 
+@router.get("/{document_id}/status")
+def get_document_status(
+    document_id: int = PathParam(..., ge=1),
+    service: DocumentService = Depends(get_document_service),
+    user: User = Depends(get_current_user),
+):
+    """
+    Get the current processing status of a document.
+    """
+    return service.get_document_status(
+        document_id=document_id,
+        user_id=user.id,
+    )
+
+
 @router.delete("/{document_id}")
 def delete_document(
     document_id: int = PathParam(..., ge=1),
@@ -86,8 +118,38 @@ def download_document(
     user: User = Depends(get_current_user),
 ):
     document = service.download_document(document_id=document_id, user_id=user.id)
-    file_path = Path(settings.upload_dir) / document.stored_filename
-    return FileResponse(
-        path=file_path,
-        filename=document.original_filename,
+
+    # Use the storage abstraction to download the file
+    file_stream = service.storage.download(document.stored_filename)
+
+    return StreamingResponse(
+        file_stream,
+        media_type="application/octet-stream",
+        headers={
+            "Content-Disposition": f"attachment; filename={document.original_filename}"
+        },
+    )
+
+
+@router.get("/{document_id}/text")
+def get_extracted_text(
+    document_id: int = PathParam(..., ge=1),
+    service: DocumentService = Depends(get_document_service),
+    user: User = Depends(get_current_user),
+):
+    """
+    Retrieve the extracted text for a document as a stream.
+    """
+    document = service.get_extracted_text(document_id=document_id, user_id=user.id)
+
+    # The laziest way to get the stream from the linked extracted_text record
+    text_path = document.extracted_text.text_path
+    text_stream = service.storage.download(text_path)
+
+    return StreamingResponse(
+        text_stream,
+        media_type="text/plain",
+        headers={
+            "Content-Disposition": f"attachment; filename=extracted_{document.id}.txt"
+        },
     )
