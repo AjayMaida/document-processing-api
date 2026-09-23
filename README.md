@@ -34,7 +34,8 @@ The system follows a clean, layered architecture to ensure maintainability and t
 ```bash
 docker compose up --build
 ```
-The API will be available at `http://localhost:8000`.
+- **API & Swagger Docs**: `http://localhost:8000` & `http://localhost:8000/docs`
+- **Frontend Studio UI**: `http://localhost:3000`
 
 ### Local Development
 1. Install dependencies:
