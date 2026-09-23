@@ -9,8 +9,13 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (usernameOrEmail: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
@@ -37,10 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, []);
 
-  const login = async (usernameOrEmail: string, password: string) => {
+  const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      await api.login({ username_or_email: usernameOrEmail, password });
+      await api.login({ username, password });
       await refreshUser();
       router.push("/dashboard");
     } finally {
@@ -48,10 +53,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => {
     setIsLoading(true);
     try {
-      await api.register({ username, email, password });
+      await api.register({
+        username,
+        email,
+        password,
+        confirm_password: confirmPassword,
+      });
       // Log in automatically after registration
       await login(username, password);
     } finally {

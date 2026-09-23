@@ -86,7 +86,18 @@ class ApiClient {
       let errorMessage = "An error occurred";
       try {
         const errorData = await response.json();
-        errorMessage = errorData.detail || errorData.message || errorMessage;
+        if (Array.isArray(errorData.detail)) {
+          errorMessage = errorData.detail
+            .map((err: { loc?: string[]; msg?: string }) => {
+              const field = err.loc && err.loc.length > 0 ? err.loc[err.loc.length - 1] : "Field";
+              return `${field}: ${err.msg || "Invalid value"}`;
+            })
+            .join(", ");
+        } else if (typeof errorData.detail === "string") {
+          errorMessage = errorData.detail;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
       } catch {
         errorMessage = response.statusText;
       }
@@ -97,18 +108,31 @@ class ApiClient {
   }
 
   // Auth Endpoints
-  async register(data: { username: string; email: string; password: string }): Promise<RegisterResponse> {
-    return this.request<RegisterResponse>("/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }, false);
+  async register(data: {
+    username: string;
+    email: string;
+    password: string;
+    confirm_password: string;
+  }): Promise<RegisterResponse> {
+    return this.request<RegisterResponse>(
+      "/auth/register",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      false
+    );
   }
 
-  async login(data: { username_or_email: string; password: string }): Promise<LoginResponse> {
-    const res = await this.request<LoginResponse>("/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }, false);
+  async login(data: { username: string; password: string }): Promise<LoginResponse> {
+    const res = await this.request<LoginResponse>(
+      "/auth/login",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      false
+    );
     this.setTokens(res);
     return res;
   }

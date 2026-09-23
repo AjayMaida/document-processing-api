@@ -19,8 +19,9 @@ export interface LoginResponse {
 }
 
 export interface RegisterResponse {
-  message: string;
-  user: User;
+  id: number;
+  username: string;
+  email: string;
 }
 
 export type ExtractionStatus = "not_started" | "pending" | "processing" | "completed" | "failed";
