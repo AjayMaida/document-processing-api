@@ -1,10 +1,12 @@
+import io
 from pathlib import Path
+from typing import BinaryIO
 
 import pymupdf
 from docx import Document as DocxDocument
 from fastapi import HTTPException, status
 
-from app.core.config import settings
+from app.core.storage.base import StorageInterface
 from app.models.document import Document
 from app.models.extracted_text import ExtractedText
 from app.repositories.extracted_text_repository import ExtractedTextRepository
@@ -19,21 +21,24 @@ class TextExtractionService:
     - Validate that the source document exists.
     - Create/manage the ExtractedText database record.
     - Extract text based on the document type.
-    - Persist extracted text outside the database.
+    - Persist extracted text via the storage provider.
     - Update extraction status and storage path.
 
     Database operations are delegated to ExtractedTextRepository.
     """
 
-    def __init__(self, repository: ExtractedTextRepository) -> None:
+    def __init__(
+        self, repository: ExtractedTextRepository, storage: StorageInterface
+    ) -> None:
         self.repository = repository
+        self.storage = storage
 
     def extract_text(self, document: Document) -> ExtractedText:
         """
         Extract text from a document and persist the extraction result.
 
-        The extracted content itself is stored as a .txt file rather than
-        in PostgreSQL. The database stores only its metadata and file path.
+        The extracted content itself is stored via the storage provider.
+        The database stores only its metadata and the stored path.
 
         Raises:
             HTTPException: If the source document does not exist or the
@@ -41,12 +46,13 @@ class TextExtractionService:
             Exception: Propagates extraction/storage failures after marking
                 the extraction as failed.
         """
-        document_path = self._get_document_path(document)
-
-        if not document_path.exists():
+        # Get file stream from storage instead of local Path
+        try:
+            file_stream = self.storage.download(document.stored_filename)
+        except FileNotFoundError:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document file not found.",
+                detail="Document file not found in storage.",
             )
 
         extracted_text = self._get_or_create_extraction(document)
@@ -58,16 +64,18 @@ class TextExtractionService:
             )
             self.repository.commit()
 
-            text = self._extract_from_file(document_path)
+            # Pass the stream to the extractor
+            text = self._extract_from_stream(file_stream, document.stored_filename)
 
-            text_path = self._save_extracted_text(
+            # Save the result back to storage
+            stored_text_path = self._save_extracted_text(
                 document.id,
                 text,
             )
 
             self.repository.update_text_path(
                 extracted_text,
-                str(text_path),
+                stored_text_path,
             )
             self.repository.update_status(
                 extracted_text,
@@ -81,10 +89,9 @@ class TextExtractionService:
             self.repository.rollback()
             self._mark_as_failed(document.id)
             raise
-
-    def _get_document_path(self, document: Document) -> Path:
-        """Return the filesystem path of the uploaded document."""
-        return Path(settings.upload_dir) / document.stored_filename
+        finally:
+            # Ensure the stream is closed
+            file_stream.close()
 
     def _get_or_create_extraction(
         self,
@@ -92,9 +99,6 @@ class TextExtractionService:
     ) -> ExtractedText:
         """
         Return the existing extraction record or create a new one.
-
-        Having a single extraction record per document keeps extraction
-        state and retry behavior easy to manage.
         """
         extracted_text = self.repository.get_by_document_id(
             document.id,
@@ -110,23 +114,23 @@ class TextExtractionService:
 
         return self.repository.create(extracted_text)
 
-    def _extract_from_file(self, document_path: Path) -> str:
-        """Dispatch extraction to the appropriate file-type handler."""
-        extension = document_path.suffix.lower()
+    def _extract_from_stream(self, file_stream: BinaryIO, filename: str) -> str:
+        """Dispatch extraction based on filename extension."""
+        extension = Path(filename).suffix.lower()
 
         try:
             if extension == ".txt":
-                return self._extract_from_txt(document_path)
+                return self._extract_from_txt(file_stream)
 
             if extension == ".pdf":
-                return self._extract_from_pdf(document_path)
+                return self._extract_from_pdf(file_stream)
 
             if extension == ".docx":
-                return self._extract_from_docx(document_path)
+                return self._extract_from_docx(file_stream)
 
         except (OSError, UnicodeError) as exc:
             raise TextExtractionError(
-                f"Failed to extract text from {document_path.name}",
+                f"Failed to extract text from {filename}",
             ) from exc
 
         raise HTTPException(
@@ -134,19 +138,19 @@ class TextExtractionService:
             detail=f"Unsupported document type: {extension}",
         )
 
-    def _extract_from_txt(self, document_path: Path) -> str:
-        """Read text directly from a plain-text document."""
-        return document_path.read_text(encoding="utf-8")
+    def _extract_from_txt(self, file_stream: BinaryIO) -> str:
+        """Read text directly from a binary stream."""
+        return file_stream.read().decode("utf-8")
 
-    def _extract_from_pdf(self, document_path: Path) -> str:
-        """Extract text from a PDF document."""
-
-        with pymupdf.open(document_path) as pdf:
+    def _extract_from_pdf(self, file_stream: BinaryIO) -> str:
+        """Extract text from a PDF binary stream."""
+        # pymupdf expects bytes or bytearray for the stream parameter
+        with pymupdf.open(stream=file_stream.read(), filetype="pdf") as pdf:
             return "\n".join(page.get_text() for page in pdf)
 
-    def _extract_from_docx(self, document_path: Path) -> str:
-        """Extract text from a DOCX document."""
-        document = DocxDocument(document_path)
+    def _extract_from_docx(self, file_stream: BinaryIO) -> str:
+        """Extract text from a DOCX binary stream."""
+        document = DocxDocument(file_stream)
 
         return "\n".join(
             paragraph.text
@@ -158,35 +162,22 @@ class TextExtractionService:
         self,
         document_id: int,
         text: str,
-    ) -> Path:
+    ) -> str:
         """
-        Persist extracted text outside PostgreSQL.
+        Persist extracted text via the storage provider.
 
-        Each document gets its own directory so that we can later support
-        additional extraction artifacts or versions without changing the
-        storage layout.
+        Stored as: extracted/{document_id}/extracted.txt
         """
-        output_dir = Path(settings.extracted_text_dir) / str(document_id)
-        output_dir.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        stored_path = f"extracted/{document_id}/extracted.txt"
 
-        text_path = output_dir / "extracted.txt"
+        # Convert text to binary stream for the storage provider
+        content = io.BytesIO(text.encode("utf-8"))
 
-        text_path.write_text(
-            text,
-            encoding="utf-8",
-        )
-
-        return text_path
+        return self.storage.upload(content, stored_path)
 
     def _mark_as_failed(self, document_id: int) -> None:
         """
         Mark the extraction as failed when processing raises an exception.
-
-        Failure to update the status should not hide the original extraction
-        exception, so this method intentionally handles its own errors.
         """
         try:
             extracted_text = self.repository.get_by_document_id(

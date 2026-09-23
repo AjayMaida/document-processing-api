@@ -4,6 +4,7 @@
 
 # Local application imports
 from app.core.celery_app import celery_app
+from app.core.storage.local import LocalStorage
 from app.db.session import SessionLocal
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.extracted_text_repository import ExtractedTextRepository
@@ -28,6 +29,9 @@ def extract_document_text(self, document_id: int, user_id: int) -> None:
     try:
         document_repository = DocumentRepository(db)
         extracted_text_repository = ExtractedTextRepository(db)
+        # Tasks run outside the FastAPI dependency injection context,
+        # so we instantiate the storage provider manually.
+        storage = LocalStorage()
 
         document = document_repository.get_document_by_id(
             document_id=document_id,
@@ -38,7 +42,8 @@ def extract_document_text(self, document_id: int, user_id: int) -> None:
             return
 
         text_extraction_service = TextExtractionService(
-            extracted_text_repository,
+            repository=extracted_text_repository,
+            storage=storage,
         )
 
         text_extraction_service.extract_text(document)

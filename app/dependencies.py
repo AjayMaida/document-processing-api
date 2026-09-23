@@ -6,6 +6,8 @@
 # ---------------------------------------------------------------------------
 # Third-party imports
 # ---------------------------------------------------------------------------
+import os
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -14,6 +16,8 @@ from sqlalchemy.orm import Session
 # Local application imports
 # ---------------------------------------------------------------------------
 from app.core.security import decode_access_token
+from app.core.storage.local import LocalStorage
+from app.core.storage.s3 import S3Storage
 from app.db.session import get_db
 from app.models.user import User
 from app.repositories.document_repository import DocumentRepository
@@ -42,6 +46,17 @@ def get_document_repository(
     return DocumentRepository(db)
 
 
+# Create  a dependency for the storage provider
+def get_storage():
+    # Determine storage provider from environment variable
+    # Defaults to "local"
+    provider = os.getenv("STORAGE_PROVIDER", "local").lower()
+
+    if provider == "s3":
+        return S3Storage()
+    return LocalStorage()
+
+
 # Creates a DocumentService using the DocumentRepository above.
 #
 # Dependency flow:
@@ -52,8 +67,9 @@ def get_document_repository(
 # DocumentService
 def get_document_service(
     repository: DocumentRepository = Depends(get_document_repository),
+    storage=Depends(get_storage),  # Inject the storage here!
 ) -> DocumentService:
-    return DocumentService(repository)
+    return DocumentService(repository, storage=storage)
 
 
 # ---------------------------------------------------------------------------

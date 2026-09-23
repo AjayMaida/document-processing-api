@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str
     access_token_expire_minutes: int
     refresh_token_expire_days: int
+    max_file_size_bytes: int = 20 * 1024 * 1024
 
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/0"

@@ -59,7 +59,7 @@ def test_extract_document_text_task_success(
     assert extracted_record.text_path is not None
 
     # Verify extracted file content on disk
-    saved_file = Path(extracted_record.text_path)
+    saved_file = upload_dir / extracted_record.text_path
     assert saved_file.exists()
     assert saved_file.read_text(encoding="utf-8") == "Celery background task content"
 
