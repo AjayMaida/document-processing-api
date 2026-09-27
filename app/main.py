@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.logging import LoggingMiddleware
-from app.routers import documents
+from app.routers import admin, documents
 from app.routers.auth import router as auth_router
 from app.routers.auth import user_router
 
@@ -35,5 +35,6 @@ def health():
 
 
 app.include_router(documents.router)
+app.include_router(admin.router)
 app.include_router(auth_router)
 app.include_router(user_router)

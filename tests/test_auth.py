@@ -480,6 +480,7 @@ def test_get_current_user_profile_success(client):
     profile = auth_me_response.json()
     assert profile["username"] == "profileuser"
     assert profile["email"] == "profile@example.com"
+    assert profile["role"] == "user"
     assert "created_at" in profile
 
     users_me_response = client.get(
@@ -488,6 +489,7 @@ def test_get_current_user_profile_success(client):
     )
     assert users_me_response.status_code == 200
     assert users_me_response.json()["username"] == "profileuser"
+    assert users_me_response.json()["role"] == "user"
 
 
 def test_get_current_user_profile_unauthorized(client):

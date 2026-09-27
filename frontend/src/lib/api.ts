@@ -1,4 +1,5 @@
 import {
+  AdminDocumentListResponse,
   AuthTokens,
   DocumentItem,
   DocumentListResponse,
@@ -6,6 +7,8 @@ import {
   LoginResponse,
   RegisterResponse,
   User,
+  UserListItem,
+  UserListResponse,
 } from "@/types/api";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -195,6 +198,45 @@ class ApiClient {
 
   getDocumentDownloadUrl(id: number): string {
     return `${API_BASE}/documents/${id}/download`;
+  }
+
+  // Admin Endpoints
+  async getAdminDocuments(page = 1, limit = 10): Promise<AdminDocumentListResponse> {
+    return this.request<AdminDocumentListResponse>(`/admin/documents?page=${page}&limit=${limit}`);
+  }
+
+  async getAdminUsers(page = 1, limit = 10): Promise<UserListResponse> {
+    return this.request<UserListResponse>(`/admin/users?page=${page}&limit=${limit}`);
+  }
+
+  async updateUserRole(userId: number, role: "admin" | "user" | string): Promise<UserListItem> {
+    return this.request<UserListItem>(`/admin/users/${userId}/role`, {
+      method: "PATCH",
+      body: JSON.stringify({ role }),
+    });
+  }
+
+  getAdminDocumentDownloadUrl(id: number): string {
+    return `${API_BASE}/admin/documents/${id}/download`;
+  }
+
+  async getAdminExtractedText(id: number): Promise<string> {
+    const token = this.getAccessToken();
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}/admin/documents/${id}/text`, { headers });
+    if (!response.ok) {
+      let error = "Failed to load extracted text";
+      try {
+        const d = await response.json();
+        error = d.detail || error;
+      } catch {}
+      throw new Error(error);
+    }
+    return response.text();
   }
 }
 

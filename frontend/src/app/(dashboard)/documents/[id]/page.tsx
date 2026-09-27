@@ -84,7 +84,7 @@ export default function DocumentStudioPage() {
     if (!extractedText || !document) return;
     const blob = new Blob([extractedText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = window.document.createElement("a");
     link.href = url;
     link.download = `extracted_${document.id}.txt`;
     link.click();

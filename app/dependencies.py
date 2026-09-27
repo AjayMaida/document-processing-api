@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 # Local application imports
 # ---------------------------------------------------------------------------
 from app.core.security import decode_access_token
+from app.core.storage.base import StorageInterface
 from app.core.storage.local import LocalStorage
 from app.core.storage.s3 import S3Storage
 from app.db.session import get_db
@@ -23,6 +24,7 @@ from app.models.user import User
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.extracted_text_repository import ExtractedTextRepository
 from app.repositories.user_repository import UserRepository
+from app.services.admin_service import AdminService
 from app.services.document_service import DocumentService
 
 # HTTP Bearer authentication scheme.
@@ -70,6 +72,22 @@ def get_document_service(
     storage=Depends(get_storage),  # Inject the storage here!
 ) -> DocumentService:
     return DocumentService(repository, storage=storage)
+
+
+def get_user_repository(db: Session = Depends(get_db)) -> UserRepository:
+    return UserRepository(db)
+
+
+def get_admin_service(
+    user_repository: UserRepository = Depends(get_user_repository),
+    document_repository: DocumentRepository = Depends(get_document_repository),
+    storage: StorageInterface = Depends(get_storage),
+) -> AdminService:
+    return AdminService(
+        user_repository=user_repository,
+        document_repository=document_repository,
+        storage=storage,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -136,3 +154,15 @@ def get_current_user(
         )
 
     return user
+
+
+def require_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Check if the authenticated user is an admin."""
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions",
+        )
+    return current_user
