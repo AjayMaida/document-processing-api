@@ -61,5 +61,6 @@ class UserListResponse(BaseModel):
     limit: int
     total: int
 
+
 class RoleUpdateRequest(BaseModel):
     role: str
