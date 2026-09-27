@@ -91,7 +91,6 @@ class DocumentRepository:
         stmt = select(Document).where(Document.id == document_id)
         return self.db.scalar(stmt)
 
-        
     def search_documents(
         self,
         query: str,

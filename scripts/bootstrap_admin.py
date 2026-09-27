@@ -11,7 +11,9 @@ from app.models.user import User
 from app.repositories.user_repository import UserRepository
 
 
-def bootstrap_admin(email: str, password: str | None = None, username: str | None = None):
+def bootstrap_admin(
+    email: str, password: str | None = None, username: str | None = None
+):
     db = SessionLocal()
     try:
         repo = UserRepository(db)
@@ -33,7 +35,9 @@ def bootstrap_admin(email: str, password: str | None = None, username: str | Non
             # Check if username is already taken
             existing_user_by_name = repo.get_by_username(user_name)
             if existing_user_by_name:
-                print(f"Error: Username '{user_name}' is already taken by another email. Specify a different --username.")
+                print(
+                    f"Error: Username '{user_name}' is already taken by another email. Specify a different --username."
+                )
                 sys.exit(1)
 
             print(f"Creating new admin user '{user_name}' ({email})...")
@@ -49,7 +53,9 @@ def bootstrap_admin(email: str, password: str | None = None, username: str | Non
         else:
             print(f"Error: User with email '{email}' not found.")
             print("To create this user as admin, provide a password:")
-            print(f"  python scripts/bootstrap_admin.py {email} --password <your-password>")
+            print(
+                f"  python scripts/bootstrap_admin.py {email} --password <your-password>"
+            )
             existing_users = repo.list_users(offset=0, limit=10)
             if existing_users:
                 print("\nExisting registered user emails:")
@@ -64,10 +70,22 @@ def bootstrap_admin(email: str, password: str | None = None, username: str | Non
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Bootstrap an admin user in the database.")
+    parser = argparse.ArgumentParser(
+        description="Bootstrap an admin user in the database."
+    )
     parser.add_argument("email", help="Email address of the admin user")
-    parser.add_argument("--password", "-p", default=os.getenv("ADMIN_PASSWORD"), help="Password if creating a new user (or set ADMIN_PASSWORD env var)")
-    parser.add_argument("--username", "-u", default=os.getenv("ADMIN_USERNAME"), help="Username if creating a new user (defaults to email prefix)")
+    parser.add_argument(
+        "--password",
+        "-p",
+        default=os.getenv("ADMIN_PASSWORD"),
+        help="Password if creating a new user (or set ADMIN_PASSWORD env var)",
+    )
+    parser.add_argument(
+        "--username",
+        "-u",
+        default=os.getenv("ADMIN_USERNAME"),
+        help="Username if creating a new user (defaults to email prefix)",
+    )
 
     args = parser.parse_args()
     bootstrap_admin(email=args.email, password=args.password, username=args.username)

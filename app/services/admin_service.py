@@ -62,9 +62,7 @@ class AdminService:
         self,
         document_id: int,
     ) -> Document:
-        document = self.document_repository.get_document_by_id_for_admin(
-            document_id
-        )
+        document = self.document_repository.get_document_by_id_for_admin(document_id)
 
         if document is None:
             raise HTTPException(status_code=404, detail="Document not found")
@@ -81,9 +79,7 @@ class AdminService:
         self,
         document_id: int,
     ) -> Document:
-        document = self.document_repository.get_document_by_id_for_admin(
-            document_id
-        )
+        document = self.document_repository.get_document_by_id_for_admin(document_id)
 
         if document is None:
             raise HTTPException(status_code=404, detail="Document not found")
@@ -117,6 +113,6 @@ class AdminService:
             raise HTTPException(status_code=404, detail="User not found")
 
         self.user_repository.update_role(user_id, role)
-        
+
         # Refresh user object to reflect change
         return self.user_repository.get_by_id(user_id)
