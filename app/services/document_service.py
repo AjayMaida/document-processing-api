@@ -1,3 +1,4 @@
+from app.models import document
 import uuid
 from pathlib import Path
 
@@ -219,6 +220,7 @@ class DocumentService:
 
         return document
 
+
     def get_extracted_text(
         self,
         document_id: int,
@@ -249,3 +251,5 @@ class DocumentService:
             )
 
         return document
+        
+        

@@ -1,5 +1,5 @@
 from sqlalchemy import delete, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.document import Document
 from app.models.extracted_text import ExtractedText
@@ -52,6 +52,25 @@ class DocumentRepository:
 
         return self.db.scalar(stmt) or 0
 
+    def list_all_documents(
+        self,
+        offset: int,
+        limit: int,
+    ) -> list[Document]:
+        stmt = (
+            select(Document)
+            .options(joinedload(Document.user))
+            .order_by(Document.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+
+        return list(self.db.scalars(stmt).all())
+
+    def count_all_documents(self) -> int:
+        stmt = select(func.count()).select_from(Document)
+        return self.db.scalar(stmt) or 0
+
     def get_document_by_id(
         self,
         document_id: int,
@@ -65,6 +84,14 @@ class DocumentRepository:
 
         return self.db.scalar(stmt)
 
+    def get_document_by_id_for_admin(
+        self,
+        document_id: int,
+    ) -> Document | None:
+        stmt = select(Document).where(Document.id == document_id)
+        return self.db.scalar(stmt)
+
+        
     def search_documents(
         self,
         query: str,
